@@ -5,13 +5,13 @@ const LOGICAL_SIZES = Object.freeze([
 ]);
 
 const LOCAL_STRINGS = Object.freeze({
-  en: { title: 'Neon Dodge', start: 'Tap to start', hint: 'Switch lanes. Stay alive.', paused: 'PAUSED', takeABreath: 'Take a breath.', menu: 'MENU', readyWhen: 'Ready when you are.', runComplete: 'RUN COMPLETE', oneMore: 'One more?', pause: 'Pause', resume: 'Resume', restart: 'Restart', score: 'Score', best: 'Best', storageNotice: 'This session score will not be saved.' },
-  'pt-BR': { title: 'Neon Dodge', start: 'Toque para começar', hint: 'Troque de faixa. Continue vivo.', paused: 'PAUSADO', takeABreath: 'Respire um pouco.', menu: 'MENU', readyWhen: 'Quando quiser, estamos prontos.', runComplete: 'FIM DA RODADA', oneMore: 'Mais uma?', pause: 'Pausar', resume: 'Continuar', restart: 'Reiniciar', score: 'Pontos', best: 'Recorde', storageNotice: 'A pontuação desta sessão não será salva.' },
-  es: { title: 'Neon Dodge', start: 'Toca para empezar', pause: 'Pausa', resume: 'Continuar', restart: 'Reiniciar', score: 'Puntuación', best: 'Mejor', storageNotice: 'La puntuación de esta sesión no se guardará.' },
-  fr: { title: 'Neon Dodge', start: 'Touchez pour commencer', pause: 'Pause', resume: 'Reprendre', restart: 'Recommencer', score: 'Score', best: 'Record', storageNotice: 'Le score de cette session ne sera pas sauvegardé.' },
-  it: { title: 'Neon Dodge', start: 'Tocca per iniziare', pause: 'Pausa', resume: 'Riprendi', restart: 'Ricomincia', score: 'Punteggio', best: 'Record', storageNotice: 'Il punteggio di questa sessione non verrà salvato.' },
-  de: { title: 'Neon Dodge', start: 'Tippen zum Starten', pause: 'Pause', resume: 'Fortsetzen', restart: 'Neustart', score: 'Punkte', best: 'Bestwert', storageNotice: 'Der Punktestand dieser Sitzung wird nicht gespeichert.' },
-  tr: { title: 'Neon Dodge', start: 'Başlamak için dokun', pause: 'Duraklat', resume: 'Devam et', restart: 'Yeniden başlat', score: 'Skor', best: 'En iyi', storageNotice: 'Bu oturumun skoru kaydedilmeyecek.' }
+  en: { title: 'Neon Dodge', start: 'Tap to start', controlHint: 'Each tap switches lanes', paused: 'PAUSED', takeABreath: 'Take a breath.', menu: 'MENU', readyWhen: 'Ready when you are.', runComplete: 'RUN COMPLETE', oneMore: 'One more?', pause: 'Pause', resume: 'Resume', restart: 'Restart', score: 'Score', best: 'Best', storageNotice: 'This session score will not be saved.' },
+  'pt-BR': { title: 'Neon Dodge', start: 'Toque para começar', controlHint: 'Cada toque alterna a faixa', paused: 'PAUSADO', takeABreath: 'Respire um pouco.', menu: 'MENU', readyWhen: 'Quando quiser, estamos prontos.', runComplete: 'FIM DA RODADA', oneMore: 'Mais uma?', pause: 'Pausar', resume: 'Continuar', restart: 'Reiniciar', score: 'Pontos', best: 'Recorde', storageNotice: 'A pontuação desta sessão não será salva.' },
+  es: { title: 'Neon Dodge', start: 'Toca para empezar', controlHint: 'Cada toque cambia de carril', pause: 'Pausa', resume: 'Continuar', restart: 'Reiniciar', score: 'Puntuación', best: 'Mejor', storageNotice: 'La puntuación de esta sesión no se guardará.' },
+  fr: { title: 'Neon Dodge', start: 'Touchez pour commencer', controlHint: 'Chaque touche change de voie', pause: 'Pause', resume: 'Reprendre', restart: 'Recommencer', score: 'Score', best: 'Record', storageNotice: 'Le score de cette session ne sera pas sauvegardé.' },
+  it: { title: 'Neon Dodge', start: 'Tocca per iniziare', controlHint: 'Ogni tocco cambia corsia', pause: 'Pausa', resume: 'Riprendi', restart: 'Ricomincia', score: 'Punteggio', best: 'Record', storageNotice: 'Il punteggio di questa sessione non verrà salvato.' },
+  de: { title: 'Neon Dodge', start: 'Tippen zum Starten', controlHint: 'Jeder Tipp wechselt die Spur', pause: 'Pause', resume: 'Fortsetzen', restart: 'Neustart', score: 'Punkte', best: 'Bestwert', storageNotice: 'Der Punktestand dieser Sitzung wird nicht gespeichert.' },
+  tr: { title: 'Neon Dodge', start: 'Başlamak için dokun', controlHint: 'Her dokunuş şeridi değiştirir', pause: 'Duraklat', resume: 'Devam et', restart: 'Yeniden başlat', score: 'Skor', best: 'En iyi', storageNotice: 'Bu oturumun skoru kaydedilmeyecek.' }
 });
 
 export const GAME_STATES = Object.freeze({
@@ -173,17 +173,41 @@ function overlaps(a, b) {
     && Math.abs(a.y - b.y) < (a.height + b.height) / 2;
 }
 
+export function getDifficultyProfile(elapsed) {
+  const time = Math.max(0, elapsed);
+  const lerp = (start, end, amount) => start + (end - start) * Math.max(0, Math.min(1, amount));
+  if (time < 15) return { speed: lerp(0.26, 0.30, time / 15), spawnInterval: lerp(1.30, 1.18, time / 15) };
+  if (time < 45) return { speed: lerp(0.30, 0.39, (time - 15) / 30), spawnInterval: lerp(1.18, 0.90, (time - 15) / 30) };
+  if (time < 90) return { speed: lerp(0.39, 0.48, (time - 45) / 45), spawnInterval: lerp(0.90, 0.74, (time - 45) / 45) };
+  return { speed: 0.52, spawnInterval: 0.72 };
+}
+
 export function createGameWorld({ random = Math.random } = {}) {
   const player = { x: 0.16, y: laneY(0), width: 0.07, height: 0.12, lane: 0, targetLane: 0 };
   const obstacles = [];
   let elapsed = 0;
   let score = 0;
-  let speed = 0.34;
-  let spawnTimer = 0.6;
+  let speed = 0.26;
+  let spawnInterval = 1.3;
+  let spawnTimer = 0.9;
+  let lastSpawnLane = null;
+  let sameLaneStreak = 0;
   let running = false;
 
-  const spawnObstacle = ({ x = 1.12, lane = random() > 0.5 ? 1 : 0 } = {}) => {
-    obstacles.push({ x, y: laneY(lane), width: 0.08, height: 0.16, lane });
+  const chooseSpawnLane = () => {
+    if (elapsed < 15) {
+      return lastSpawnLane === null ? 0 : lastSpawnLane === 0 ? 1 : 0;
+    }
+    let lane = random() > 0.5 ? 1 : 0;
+    if (lane === lastSpawnLane && sameLaneStreak >= 1) lane = lane === 0 ? 1 : 0;
+    return lane;
+  };
+
+  const spawnObstacle = ({ x = 1.12, lane } = {}) => {
+    const nextLane = Number.isInteger(lane) ? lane : chooseSpawnLane();
+    sameLaneStreak = nextLane === lastSpawnLane ? sameLaneStreak + 1 : 0;
+    lastSpawnLane = nextLane;
+    obstacles.push({ x, y: laneY(nextLane), width: 0.08, height: 0.16, lane: nextLane });
   };
 
   return {
@@ -194,8 +218,11 @@ export function createGameWorld({ random = Math.random } = {}) {
       player.y = laneY(0);
       elapsed = 0;
       score = 0;
-      speed = 0.34;
-      spawnTimer = 0.6;
+      speed = 0.26;
+      spawnInterval = 1.3;
+      spawnTimer = 0.9;
+      lastSpawnLane = null;
+      sameLaneStreak = 0;
       running = true;
       if (Number.isFinite(obstacleX)) spawnObstacle({ x: obstacleX, lane: obstacleLane ?? 0 });
     },
@@ -207,17 +234,17 @@ export function createGameWorld({ random = Math.random } = {}) {
       if (Math.abs(player.y - laneY(player.targetLane)) < 0.002) player.lane = player.targetLane;
       elapsed += safeDt;
       score = Math.floor(elapsed * 10);
-      speed = 0.34 + Math.min(0.46, elapsed * 0.012);
+      ({ speed, spawnInterval } = getDifficultyProfile(elapsed));
       spawnTimer -= safeDt;
       if (spawnTimer <= 0) {
         spawnObstacle();
-        spawnTimer = Math.max(0.48, 1.08 - elapsed * 0.006);
+        spawnTimer += spawnInterval;
       }
       for (const obstacle of obstacles) obstacle.x -= speed * safeDt;
       while (obstacles.length && obstacles[0].x < -0.2) obstacles.shift();
     },
     snapshot() {
-      return { elapsed, score, speed, player: { ...player }, obstacles: obstacles.map(obstacle => ({ ...obstacle })) };
+      return { elapsed, score, speed, spawnInterval, player: { ...player }, obstacles: obstacles.map(obstacle => ({ ...obstacle })) };
     },
     isCollision() { return obstacles.some(obstacle => overlaps(player, obstacle)); },
     stop() { running = false; },
@@ -425,6 +452,7 @@ export async function bootstrap({
     best: documentRef.querySelector('#best-value'),
     title: documentRef.querySelector('#game-title'),
     start: documentRef.querySelector('#start-label'),
+    playingHint: documentRef.querySelector('#playing-hint'),
     pauseButton: documentRef.querySelector('#pause-button'),
     restartButton: documentRef.querySelector('#restart-button')
   };
@@ -455,6 +483,7 @@ export async function bootstrap({
     setVisible(elements.pause, state === GAME_STATES.PAUSED);
     setVisible(elements.menu, state === GAME_STATES.MENU);
     setVisible(elements.gameOver, state === GAME_STATES.GAME_OVER);
+    setVisible(elements.playingHint, state === GAME_STATES.PLAYING);
     if (elements.shell) elements.shell.dataset.state = state;
   };
   const refreshHud = snapshot => {
@@ -549,8 +578,10 @@ export async function bootstrap({
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  window.PokiSDK = createPokiMock({ commercialBreakDuration: 420 });
+  const pokiSdk = createPokiMock({ commercialBreakDuration: 420 });
+  globalThis.PokiSDK = pokiSdk;
+  window.PokiSDK = pokiSdk;
   window.addEventListener('DOMContentLoaded', () => {
-    bootstrap({ sdk: window.PokiSDK }).catch(() => undefined);
+    bootstrap({ sdk: pokiSdk }).catch(() => undefined);
   }, { once: true });
 }

@@ -32,6 +32,8 @@ button { font: inherit; color: inherit; }
 .hud-button, .touch-button { border: 1px solid rgba(246, 247, 255, 0.24); background: rgba(8, 11, 34, 0.7); cursor: pointer; }
 .hud-button { width: 40px; height: 40px; border-radius: 12px; font-size: 18px; }
 .hud-button:hover, .hud-button:focus-visible, .touch-button:hover, .touch-button:focus-visible { border-color: var(--cyan); outline: 2px solid rgba(32, 199, 245, 0.3); outline-offset: 2px; }
+.playing-hint { position: absolute; top: clamp(68px, 12%, 92px); left: 50%; transform: translateX(-50%); margin: 0; padding: 6px 12px; border: 1px solid rgba(32, 199, 245, 0.22); border-radius: 999px; background: rgba(8, 11, 34, 0.58); color: rgba(246, 247, 255, 0.7); font-size: clamp(10px, 1.5vw, 14px); letter-spacing: 0.03em; pointer-events: none; white-space: nowrap; }
+.playing-hint[hidden] { display: none; }
 
 .state-panel { position: absolute; inset: 22% 12% 18%; display: grid; place-content: center; gap: 8px; padding: 24px; text-align: center; background: var(--panel); border: 1px solid rgba(32, 199, 245, 0.25); border-radius: 24px; pointer-events: auto; backdrop-filter: blur(10px); }
 .state-panel[hidden], .storage-notice[hidden] { display: none; }

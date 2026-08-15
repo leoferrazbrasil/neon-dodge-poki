@@ -16,7 +16,7 @@ test('perfil de dificuldade respeita fases e limites aprovados', () => {
 test('primeiro obstáculo aguarda abertura e a sequência inicial alterna faixas', () => {
   const world = createGameWorld({ random: () => 0.9 });
   world.reset();
-  for (let index = 0; index < 17; index += 1) world.update(0.05);
+  for (let index = 0; index < 18; index += 1) world.update(0.05);
   const first = world.snapshot().obstacles[0];
   assert.equal(first.lane, 0);
   for (let index = 0; index < 28; index += 1) world.update(0.05);
@@ -28,4 +28,9 @@ test('onboarding explica iniciar e alternar faixa', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /Toque para começar/);
   assert.match(html, /Cada toque alterna a faixa/);
+});
+
+test('mock Poki fica exposto no escopo global do navegador', () => {
+  const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
+  assert.match(source, /globalThis\.PokiSDK/);
 });
