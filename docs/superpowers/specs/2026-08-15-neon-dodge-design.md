@@ -11,8 +11,10 @@ O jogador alterna entre duas faixas com um toque ou clique. Obstáculos avançam
 - O primeiro input físico inicia uma rodada e dispara `PokiSDK.gameplayStart()` exatamente uma vez.
 - A morte, pausa ou abertura de menu dispara `PokiSDK.gameplayStop()` exatamente uma vez.
 - O reinício a partir de Game Over passa por `PokiSDK.commercialBreak()` antes de retornar a `Ready`.
+- O estado `Ready` só é exibido depois de `PokiSDK.init()` resolver ou rejeitar, dos shaders estarem compilados e de `PokiSDK.gameLoadingFinished()` ser chamado uma vez.
 - Nenhum método do jogo faz requests HTTP, carrega CDN, usa fonte externa ou depende de serviço de terceiros.
 - O jogo continua funcionando se `localStorage` estiver indisponível ou lançar exceção.
+- Quando a persistência falhar, a interface informa de forma não-intrusiva que o score da sessão não será retido após fechar a aba.
 - O canvas mantém composição 16:9, escala de forma proporcional e funciona em portrait e landscape.
 - Controles de toque ficam disponíveis em dispositivos móveis e tablets.
 - O descarregamento inicial permanece abaixo de 8 MB.
@@ -30,7 +32,9 @@ Essa abordagem mantém o pacote pequeno e atende ao perfil técnico WebGL sem in
 index.html
 styles.css
 game.js
+strings.json
 docs/superpowers/specs/2026-08-15-neon-dodge-design.md
+tests/poki-state.test.mjs
 ```
 
 `index.html` contém a estrutura semântica da interface, o canvas e os painéis de Ready, pausa e Game Over.
@@ -39,9 +43,16 @@ docs/superpowers/specs/2026-08-15-neon-dodge-design.md
 
 `game.js` contém o mock do SDK, estado da partida, input, loop, renderer, colisões, dificuldade, áudio sintético e persistência segura.
 
+`strings.json` contém o dicionário local da interface, separado da lógica. O primeiro pacote terá as mensagens essenciais em inglês, português do Brasil, espanhol, francês, italiano, alemão e turco, sem carregar fontes externas.
+
+`tests/poki-state.test.mjs` fica fora do build final e cobre as transições assíncronas e as travas do SDK.
+
 ## Estados e fluxo
 
 ```text
+Booting
+  └─ init + shaders + recursos locais concluídos → gameLoadingFinished() → Ready
+
 Ready
   └─ primeiro input físico → Playing + gameplayStart()
 
@@ -69,21 +80,25 @@ O build define `window.PokiSDK` localmente com métodos assíncronos:
 
 ```js
 window.PokiSDK = {
+  async init() {},
+  async gameLoadingFinished() {},
   async gameplayStart() {},
   async gameplayStop() {},
   async commercialBreak() {}
 };
 ```
 
-O mock não faz rede. `commercialBreak()` representa uma espera curta local e resolve mesmo sem inventário de anúncio real.
+O mock não faz rede. `init()` resolve localmente; `gameLoadingFinished()` registra a conclusão lógica do carregamento; `commercialBreak()` representa uma espera curta local e resolve mesmo sem inventário de anúncio real.
 
 O controlador de integração mantém pelo menos estas travas:
 
+- `pokiInitialized`: impede inicialização concorrente.
+- `pokiLoadingFinished`: impede conclusão de carregamento duplicada.
 - `pokiGameplayActive`: impede `gameplayStart()` duplicado e só permite início quando falso.
 - `pokiGameplayStopped`: impede `gameplayStop()` duplicado e é atualizado em cada transição válida.
 - `commercialBreakBusy`: impede duas pausas comerciais simultâneas.
 
-As funções de transição serão os únicos pontos autorizados a chamar o mock. O loop de renderização nunca chama métodos do SDK por conta própria.
+O bootstrap aguardará `init()` mesmo quando a Promise rejeitar, continuará preparando o renderer local e só então chamará `gameLoadingFinished()` uma vez. O painel Ready só ficará visível depois dessa chamada. As funções de transição serão os únicos pontos autorizados a chamar métodos de gameplay e monetização; o loop de renderização nunca chama métodos do SDK por conta própria.
 
 ## Renderização e proporção
 
@@ -105,7 +120,7 @@ No WebGL, o jogo desenha fundo em gradiente simples, faixas, jogador, obstáculo
 
 ## Input, pausa e acessibilidade
 
-O jogo aceitará pointer events no canvas e em botões, além de teclado (`Space`, `ArrowUp`, `ArrowDown` e `P`) no desktop. O input será normalizado para não responder duas vezes a uma mesma interação híbrida touch/mouse.
+O jogo aceitará pointer events no canvas e em botões, além de teclado (`Space`, `ArrowUp`, `ArrowDown`, `Escape` e `P`) no desktop. `Escape` e `P` alternarão pausa/menu conforme o estado atual. O input será normalizado para não responder duas vezes a uma mesma interação híbrida touch/mouse.
 
 Em mobile/tablet, o controle tátil será exibido sempre. Em desktop, ele poderá permanecer oculto visualmente, mas a área de interação continuará acessível por pointer event. Botões terão área de toque confortável, foco visível e texto legível sem depender de ícones externos.
 
@@ -117,6 +132,7 @@ O melhor score será lido e escrito por wrappers isolados:
 
 - cada leitura usa `try/catch` e retorna `0` em falha;
 - cada gravação usa `try/catch` e falha silenciosamente;
+- uma falha de leitura ou gravação ativa um aviso visual não-intrusivo de sessão não persistida;
 - nenhum estado essencial da partida depende do armazenamento;
 - o código não retém credenciais ou dados sensíveis.
 
@@ -132,6 +148,7 @@ Antes da entrega, serão verificadas:
 - teste da persistência quando `localStorage` lança erro;
 - teste do ciclo Game Over → `commercialBreak()` → Ready;
 - validação estática de ausência de URLs externas e `console.log`;
+- verificação de que o painel Ready só aparece depois de `gameLoadingFinished()`;
 - execução local em viewport desktop, portrait e landscape;
 - verificação do tamanho total do build e dos arquivos baixados;
 - verificação visual e interação básica em navegador.
@@ -140,5 +157,6 @@ Antes da entrega, serão verificadas:
 
 - anúncios reais, integração com o SDK oficial ou chamadas de terceiros;
 - login, ranking online, backend, analytics e telemetria;
+- AUDS, Netlib, Chat API, servidores Node.js e qualquer integração multiplayer;
 - sistema de fases, loja, narrativa ou assets pesados;
 - editor interno, debug overlay ou ferramentas de desenvolvimento no build.
