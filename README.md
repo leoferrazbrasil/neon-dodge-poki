@@ -19,3 +19,7 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 - Canvas lógico 16:9 com suporte desktop, portrait e landscape.
 - Mock local do PokiSDK com `gameLoadingFinished`, `gameplayStart`, `gameplayStop` e `commercialBreak`.
 - Persistência protegida contra falhas de `localStorage`.
+
+## Organização local
+
+O repositório deve ser aberto a partir da pasta `neon-dodge-poki`. O cofre Obsidian e as referências externas ficam como diretórios irmãos no workspace e não fazem parte do build ou do histórico do jogo.
