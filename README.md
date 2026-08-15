@@ -4,7 +4,7 @@ MVP hipercasual WebGL para prova de conceito técnica na Poki.
 
 ## Estado
 
-O repositório contém a especificação de design e o plano de implementação aprovados. A implementação do jogo será adicionada nas tarefas seguintes, mantendo o build sem dependências externas e abaixo de 8 MB.
+O repositório contém o MVP implementado, sua especificação, o plano e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 33.230 bytes nos quatro arquivos principais.
 
 ## Documentação
 
