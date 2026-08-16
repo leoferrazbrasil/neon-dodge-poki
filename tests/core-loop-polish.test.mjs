@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGameWorld, getDifficultyProfile, createInitialProgression, getVisualStyle } from '../game.js';
+import { createGameWorld, getDifficultyProfile, createInitialProgression, getVisualStyle, getPlayerShape, getObstacleShape, getSceneDecorations } from '../game.js';
 
 test('perfil de dificuldade respeita fases e limites aprovados', () => {
   assert.deepEqual(getDifficultyProfile(0), { speed: 0.26, spawnInterval: 1.3 });
@@ -55,6 +55,46 @@ test('loadout inicial usa a identidade Cidade Neon', () => {
   const style = getVisualStyle(createInitialProgression());
   assert.equal(style.background, '#080b22');
   assert.equal(style.player, '#fbe047');
+});
+
+test('identidade visual narrativa preserva as hitboxes do core loop', () => {
+  const world = createGameWorld({ random: () => 0.5 });
+  world.reset({ obstacleX: 0.16, obstacleLane: 0 });
+  const obstacle = world.snapshot().obstacles[0];
+  const style = getVisualStyle(createInitialProgression());
+  assert.equal(obstacle.width, 0.08);
+  assert.equal(obstacle.height, 0.16);
+  assert.equal(obstacle.kind, 0);
+  assert.equal(style.form, 'form-default');
+  assert.equal(style.theme, 'theme-city');
+  assert.match(style.playerAccent, /^#/);
+  assert.match(style.obstacleAccent, /^#/);
+});
+
+test('formas de NOVA e variantes de Glitch têm silhuetas determinísticas', () => {
+  const starter = getPlayerShape('form-default');
+  const pulse = getPlayerShape('form-evolved');
+  const plasma = getPlayerShape('form-advanced');
+  const drone = getObstacleShape(0);
+  const prism = getObstacleShape(1);
+  assert.ok(starter.length >= 4);
+  assert.ok(pulse.length >= 4);
+  assert.ok(plasma.length >= 4);
+  assert.notDeepEqual(starter, pulse);
+  assert.notDeepEqual(pulse, plasma);
+  assert.notDeepEqual(drone, prism);
+});
+
+test('cada tema possui cenário visual procedural próprio', () => {
+  const city = getSceneDecorations('theme-city');
+  const crystal = getSceneDecorations('theme-crystal');
+  const cosmic = getSceneDecorations('theme-cosmic');
+  assert.ok(city.length > 0);
+  assert.ok(crystal.length > 0);
+  assert.ok(cosmic.length > 0);
+  assert.notDeepEqual(city, crystal);
+  assert.notDeepEqual(crystal, cosmic);
+  assert.ok(city.every(item => item.kind && Number.isFinite(item.x)));
 });
 
 test('coleção usa cards amplos e alvos de toque acessíveis', () => {

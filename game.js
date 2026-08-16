@@ -309,6 +309,7 @@ export function createGameWorld({ random = Math.random } = {}) {
   let spawnTimer = 0.9;
   let lastSpawnLane = null;
   let sameLaneStreak = 0;
+  let obstacleSerial = 0;
   let running = false;
 
   const chooseSpawnLane = () => {
@@ -324,7 +325,8 @@ export function createGameWorld({ random = Math.random } = {}) {
     const nextLane = Number.isInteger(lane) ? lane : chooseSpawnLane();
     sameLaneStreak = nextLane === lastSpawnLane ? sameLaneStreak + 1 : 0;
     lastSpawnLane = nextLane;
-    obstacles.push({ x, y: laneY(nextLane), width: 0.08, height: 0.16, lane: nextLane });
+    obstacles.push({ x, y: laneY(nextLane), width: 0.08, height: 0.16, lane: nextLane, kind: obstacleSerial % 3 });
+    obstacleSerial += 1;
   };
 
   return {
@@ -340,6 +342,7 @@ export function createGameWorld({ random = Math.random } = {}) {
       spawnTimer = 0.9;
       lastSpawnLane = null;
       sameLaneStreak = 0;
+      obstacleSerial = 0;
       running = true;
       if (Number.isFinite(obstacleX)) spawnObstacle({ x: obstacleX, lane: obstacleLane ?? 0 });
     },
@@ -380,17 +383,66 @@ export function getVisualStyle(progression) {
   const skin = progression?.equipped?.skin || 'skin-cyan';
   const form = progression?.equipped?.form || 'form-default';
   const themes = {
-    'theme-city': { background: '#080b22', lane: '#20c7f5', accent: '#24306b' },
-    'theme-crystal': { background: '#101936', lane: '#75e7ff', accent: '#344c86' },
-    'theme-cosmic': { background: '#170d2f', lane: '#d68cff', accent: '#5b2f79' }
+    'theme-city': { background: '#080b22', lane: '#20c7f5', accent: '#24306b', playerAccent: '#73e6ff', obstacleAccent: '#ffb3c2' },
+    'theme-crystal': { background: '#101936', lane: '#75e7ff', accent: '#344c86', playerAccent: '#d4fbff', obstacleAccent: '#f2b5ff' },
+    'theme-cosmic': { background: '#170d2f', lane: '#d68cff', accent: '#5b2f79', playerAccent: '#f4d8ff', obstacleAccent: '#ff9dbd' }
   };
   const skins = { 'skin-cyan': '#fbe047', 'skin-magenta': '#ff6bd6', 'skin-amber': '#ffb347' };
+  const activeTheme = themes[theme] || themes['theme-city'];
   return {
-    ...(themes[theme] || themes['theme-city']),
+    ...activeTheme,
+    theme: themes[theme] ? theme : 'theme-city',
     player: skins[skin] || skins['skin-cyan'],
     obstacle: '#fa416b',
+    form,
+    equipment: progression?.equipped?.equipment || null,
     formScale: form === 'form-advanced' ? 1.08 : form === 'form-evolved' ? 1.04 : 1
   };
+}
+
+const PLAYER_SHAPES = Object.freeze({
+  'form-default': Object.freeze([[-0.5, -0.35], [-0.2, -0.5], [0.3, -0.42], [0.5, -0.12], [0.42, 0.35], [0.05, 0.5], [-0.4, 0.35]]),
+  'form-evolved': Object.freeze([[-0.5, 0], [-0.2, -0.48], [0.25, -0.35], [0.5, 0], [0.25, 0.35], [-0.2, 0.48]]),
+  'form-advanced': Object.freeze([[-0.5, 0], [-0.25, -0.2], [-0.12, -0.5], [0.12, -0.22], [0.5, 0], [0.12, 0.22], [0.12, 0.5], [-0.12, 0.22]])
+});
+
+const OBSTACLE_SHAPES = Object.freeze({
+  0: Object.freeze([[-0.5, -0.25], [-0.25, -0.5], [0.25, -0.5], [0.5, -0.25], [0.25, 0.5], [-0.25, 0.5]]),
+  1: Object.freeze([[0, -0.5], [0.35, -0.25], [0.5, 0], [0.35, 0.25], [0, 0.5], [-0.35, 0.25], [-0.5, 0], [-0.35, -0.25]]),
+  2: Object.freeze([[-0.5, -0.5], [0.5, -0.5], [0.5, -0.25], [-0.18, -0.25], [-0.18, 0.25], [0.5, 0.25], [0.5, 0.5], [-0.5, 0.5]])
+});
+
+const SCENE_DECORATIONS = Object.freeze({
+  'theme-city': Object.freeze([
+    Object.freeze({ kind: 'building', x: 0.05, y: 0.1, width: 0.08, height: 0.18, tone: 'accent' }),
+    Object.freeze({ kind: 'building', x: 0.18, y: 0.16, width: 0.06, height: 0.12, tone: 'lane' }),
+    Object.freeze({ kind: 'building', x: 0.78, y: 0.1, width: 0.1, height: 0.18, tone: 'accent' }),
+    Object.freeze({ kind: 'beacon', x: 0.92, y: 0.19, width: 0.012, height: 0.18, tone: 'playerAccent' })
+  ]),
+  'theme-crystal': Object.freeze([
+    Object.freeze({ kind: 'crystal', x: 0.1, y: 0.16, width: 0.1, height: 0.22, tone: 'lane' }),
+    Object.freeze({ kind: 'crystal', x: 0.24, y: 0.1, width: 0.06, height: 0.16, tone: 'accent' }),
+    Object.freeze({ kind: 'crystal', x: 0.82, y: 0.14, width: 0.12, height: 0.24, tone: 'playerAccent' }),
+    Object.freeze({ kind: 'beacon', x: 0.94, y: 0.2, width: 0.012, height: 0.2, tone: 'lane' })
+  ]),
+  'theme-cosmic': Object.freeze([
+    Object.freeze({ kind: 'star', x: 0.1, y: 0.12, width: 0.06, height: 0.06, tone: 'playerAccent' }),
+    Object.freeze({ kind: 'panel', x: 0.2, y: 0.1, width: 0.12, height: 0.08, tone: 'accent' }),
+    Object.freeze({ kind: 'orb', x: 0.82, y: 0.14, width: 0.1, height: 0.1, tone: 'lane' }),
+    Object.freeze({ kind: 'star', x: 0.94, y: 0.22, width: 0.05, height: 0.05, tone: 'playerAccent' })
+  ])
+});
+
+export function getPlayerShape(form = 'form-default') {
+  return PLAYER_SHAPES[form] || PLAYER_SHAPES['form-default'];
+}
+
+export function getObstacleShape(kind = 0) {
+  return OBSTACLE_SHAPES[Math.abs(Number(kind)) % 3] || OBSTACLE_SHAPES[0];
+}
+
+export function getSceneDecorations(theme = 'theme-city') {
+  return SCENE_DECORATIONS[theme] || SCENE_DECORATIONS['theme-city'];
 }
 
 function hexToRgba(hex, alpha = 1) {
@@ -401,11 +453,64 @@ function hexToRgba(hex, alpha = 1) {
   return [red, green, blue, alpha];
 }
 
+function rgbaToCss([red, green, blue, alpha]) {
+  return `rgba(${Math.round(red * 255)}, ${Math.round(green * 255)}, ${Math.round(blue * 255)}, ${alpha})`;
+}
+
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   return shader;
+}
+
+function toPixels(shape, centerX, centerY, width, height, scaleX, scaleY) {
+  return shape.map(([x, y]) => [(centerX + x * width) * scaleX, (centerY + y * height) * scaleY]);
+}
+
+function drawSceneArt(style, size, drawRect, drawPolygon) {
+  const scaleX = size.width;
+  const scaleY = size.height;
+  const colorFor = tone => hexToRgba(style[tone] || style.accent, 0.42);
+  for (const item of getSceneDecorations(style.theme)) {
+    const x = item.x * scaleX;
+    const y = item.y * scaleY;
+    const width = item.width * scaleX;
+    const height = item.height * scaleY;
+    if (item.kind === 'building' || item.kind === 'beacon' || item.kind === 'panel') {
+      drawRect(x, y, width, height, colorFor(item.tone));
+    } else if (item.kind === 'crystal') {
+      drawPolygon([[x, y - height / 2], [x + width / 2, y], [x, y + height / 2], [x - width / 2, y]], colorFor(item.tone));
+    } else if (item.kind === 'star') {
+      drawPolygon([[x, y - height / 2], [x + width * 0.18, y - height * 0.18], [x + width / 2, y], [x + width * 0.18, y + height * 0.18], [x, y + height / 2], [x - width * 0.18, y + height * 0.18], [x - width / 2, y], [x - width * 0.18, y - height * 0.18]], colorFor(item.tone));
+    } else if (item.kind === 'orb') {
+      drawPolygon([[x, y - height / 2], [x + width * 0.35, y - height * 0.35], [x + width / 2, y], [x + width * 0.35, y + height * 0.35], [x, y + height / 2], [x - width * 0.35, y + height * 0.35], [x - width / 2, y], [x - width * 0.35, y - height * 0.35]], colorFor(item.tone));
+    }
+  }
+}
+
+function drawPlayerArt(style, player, size, drawRect, drawPolygon) {
+  const scaleX = size.width;
+  const scaleY = size.height;
+  const playerWidth = player.width * style.formScale;
+  const playerHeight = player.height * style.formScale;
+  drawPolygon(toPixels(getPlayerShape(style.form), player.x, player.y, playerWidth, playerHeight, scaleX, scaleY), hexToRgba(style.player));
+  drawRect((player.x - playerWidth * 0.25) * scaleX, (player.y - playerHeight * 0.1) * scaleY, playerWidth * 0.5 * scaleX, playerHeight * 0.2 * scaleY, hexToRgba(style.playerAccent, 0.95));
+  drawRect((player.x - playerWidth * 0.08) * scaleX, (player.y - playerHeight * 0.04) * scaleY, playerWidth * 0.16 * scaleX, playerHeight * 0.08 * scaleY, hexToRgba(style.background));
+  if (style.equipment === 'equipment-visor') {
+    drawRect((player.x - playerWidth * 0.7) * scaleX, (player.y - playerHeight * 0.68) * scaleY, playerWidth * 0.18 * scaleX, playerHeight * 1.36 * scaleY, hexToRgba(style.lane, 0.85));
+  }
+}
+
+function drawObstacleArt(style, obstacle, size, drawRect, drawPolygon) {
+  const scaleX = size.width;
+  const scaleY = size.height;
+  drawPolygon(toPixels(getObstacleShape(obstacle.kind), obstacle.x, obstacle.y, obstacle.width, obstacle.height, scaleX, scaleY), hexToRgba(style.obstacle));
+  if (obstacle.kind === 1) {
+    drawPolygon(toPixels([[-0.22, 0], [0, -0.22], [0.22, 0], [0, 0.22]], obstacle.x, obstacle.y, obstacle.width, obstacle.height, scaleX, scaleY), hexToRgba(style.obstacleAccent));
+  } else {
+    drawRect((obstacle.x - obstacle.width * 0.2) * scaleX, (obstacle.y - obstacle.height * 0.08) * scaleY, obstacle.width * 0.4 * scaleX, obstacle.height * 0.16 * scaleY, hexToRgba(style.obstacleAccent));
+  }
 }
 
 function createWebGLRenderer(canvas, gl) {
@@ -429,6 +534,18 @@ function createWebGLRenderer(canvas, gl) {
     gl.uniform4f(colorLocation, color[0], color[1], color[2], color[3]);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
+  const drawPolygon = (points, color) => {
+    const vertices = [];
+    for (let index = 1; index < points.length - 1; index += 1) {
+      vertices.push(points[0][0], points[0][1], points[index][0], points[index][1], points[index + 1][0], points[index + 1][1]);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform4f(colorLocation, color[0], color[1], color[2], color[3]);
+    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
+  };
 
   return {
     resize() {
@@ -447,18 +564,13 @@ function createWebGLRenderer(canvas, gl) {
       gl.clear(gl.COLOR_BUFFER_BIT);
       const scaleX = size.width;
       const scaleY = size.height;
+      drawSceneArt(style, size, drawRect, drawPolygon);
       drawRect(0, scaleY * 0.49, scaleX, scaleY * 0.02, hexToRgba(style.accent));
       drawRect(0, scaleY * 0.35, scaleX, scaleY * 0.008, hexToRgba(style.lane, 0.7));
       drawRect(0, scaleY * 0.63, scaleX, scaleY * 0.008, hexToRgba(style.lane, 0.7));
-      const player = snapshot.player;
-      const playerWidth = player.width * style.formScale;
-      const playerHeight = player.height * style.formScale;
-      if (progression?.equipped?.equipment === 'equipment-visor') {
-        drawRect((player.x - playerWidth * 0.7) * scaleX, (player.y - playerHeight * 0.68) * scaleY, playerWidth * 0.18 * scaleX, playerHeight * 1.36 * scaleY, hexToRgba(style.lane, 0.85));
-      }
-      drawRect((player.x - playerWidth / 2) * scaleX, (player.y - playerHeight / 2) * scaleY, playerWidth * scaleX, playerHeight * scaleY, hexToRgba(style.player));
+      drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon);
       for (const obstacle of snapshot.obstacles) {
-        drawRect((obstacle.x - obstacle.width / 2) * scaleX, (obstacle.y - obstacle.height / 2) * scaleY, obstacle.width * scaleX, obstacle.height * scaleY, hexToRgba(style.obstacle));
+        drawObstacleArt(style, obstacle, size, drawRect, drawPolygon);
       }
     },
     destroy() { gl.deleteBuffer(buffer); gl.deleteProgram(program); }
@@ -467,6 +579,18 @@ function createWebGLRenderer(canvas, gl) {
 
 function createCanvasRenderer(canvas, ctx) {
   const size = { ...LOGICAL_SIZES[2] };
+  const drawRect = (x, y, width, height, color) => {
+    ctx.fillStyle = rgbaToCss(color);
+    ctx.fillRect(x, y, width, height);
+  };
+  const drawPolygon = (points, color) => {
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    for (let index = 1; index < points.length; index += 1) ctx.lineTo(points[index][0], points[index][1]);
+    ctx.closePath();
+    ctx.fillStyle = rgbaToCss(color);
+    ctx.fill();
+  };
   return {
     resize() {
       Object.assign(size, selectLogicalSize(Math.max(320, canvas.clientWidth || 640)));
@@ -479,22 +603,12 @@ function createCanvasRenderer(canvas, ctx) {
       const style = getVisualStyle(progression);
       ctx.fillStyle = style.background;
       ctx.fillRect(0, 0, size.width, size.height);
-      ctx.fillStyle = style.accent;
-      ctx.fillRect(0, size.height * 0.49, size.width, size.height * 0.02);
-      ctx.fillStyle = style.lane;
-      ctx.fillRect(0, size.height * 0.35, size.width, size.height * 0.008);
-      ctx.fillRect(0, size.height * 0.63, size.width, size.height * 0.008);
-      const player = snapshot.player;
-      const playerWidth = player.width * style.formScale;
-      const playerHeight = player.height * style.formScale;
-      if (progression?.equipped?.equipment === 'equipment-visor') {
-        ctx.fillStyle = style.lane;
-        ctx.fillRect((player.x - playerWidth * 0.7) * size.width, (player.y - playerHeight * 0.68) * size.height, playerWidth * 0.18 * size.width, playerHeight * 1.36 * size.height);
-      }
-      ctx.fillStyle = style.player;
-      ctx.fillRect((player.x - playerWidth / 2) * size.width, (player.y - playerHeight / 2) * size.height, playerWidth * size.width, playerHeight * size.height);
-      ctx.fillStyle = style.obstacle;
-      for (const obstacle of snapshot.obstacles) ctx.fillRect((obstacle.x - obstacle.width / 2) * size.width, (obstacle.y - obstacle.height / 2) * size.height, obstacle.width * size.width, obstacle.height * size.height);
+      drawSceneArt(style, size, drawRect, drawPolygon);
+      drawRect(0, size.height * 0.49, size.width, size.height * 0.02, hexToRgba(style.accent));
+      drawRect(0, size.height * 0.35, size.width, size.height * 0.008, hexToRgba(style.lane, 0.7));
+      drawRect(0, size.height * 0.63, size.width, size.height * 0.008, hexToRgba(style.lane, 0.7));
+      drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon);
+      for (const obstacle of snapshot.obstacles) drawObstacleArt(style, obstacle, size, drawRect, drawPolygon);
     },
     destroy() {}
   };
