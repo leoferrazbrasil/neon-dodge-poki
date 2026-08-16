@@ -644,6 +644,7 @@ export async function bootstrap({
     title: documentRef.querySelector('#game-title'),
     start: documentRef.querySelector('#start-label'),
     playingHint: documentRef.querySelector('#playing-hint'),
+    mobileControls: documentRef.querySelector('#mobile-controls'),
     pauseButton: documentRef.querySelector('#pause-button'),
     restartButton: documentRef.querySelector('#restart-button'),
     readyProgression: documentRef.querySelector('#ready-progression'),
@@ -687,6 +688,7 @@ export async function bootstrap({
       const equipped = latestProgression.equipped[type] === rewardId;
       const row = documentRef.createElement('div');
       row.className = 'loadout-item';
+      row.dataset.type = type;
       row.dataset.equipped = String(equipped);
       const label = documentRef.createElement('span');
       label.textContent = `${rewardTypeName(type)}: ${rewardName(rewardId)}`;
@@ -726,6 +728,7 @@ export async function bootstrap({
     setVisible(elements.menu, state === GAME_STATES.MENU);
     setVisible(elements.gameOver, state === GAME_STATES.GAME_OVER);
     setVisible(elements.playingHint, state === GAME_STATES.PLAYING);
+    setVisible(elements.mobileControls, state === GAME_STATES.PLAYING);
     if (elements.shell) elements.shell.dataset.state = state;
     syncProgressionUi();
   };
