@@ -32,6 +32,23 @@ button { font: inherit; color: inherit; }
 .hud-button, .touch-button { border: 1px solid rgba(246, 247, 255, 0.24); background: rgba(8, 11, 34, 0.7); cursor: pointer; }
 .hud-button { width: 40px; height: 40px; border-radius: 12px; font-size: 18px; }
 .hud-button:hover, .hud-button:focus-visible, .touch-button:hover, .touch-button:focus-visible { border-color: var(--cyan); outline: 2px solid rgba(32, 199, 245, 0.3); outline-offset: 2px; }
+.signal-meter { position: absolute; top: clamp(52px, 9%, 74px); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 6px; border: 1px solid rgba(32, 199, 245, 0.2); border-radius: 999px; background: rgba(8, 11, 34, 0.55); pointer-events: none; }
+.signal-meter[hidden] { display: none; }
+.signal-chip { width: 12px; height: 12px; border-radius: 999px; background: var(--yellow); box-shadow: 0 0 0 2px rgba(8, 11, 34, 0.8), 0 0 10px currentColor; flex: none; }
+.signal-chip[data-type="form"] { background: var(--yellow); }
+.signal-chip[data-type="skin"] { background: var(--pink); }
+.signal-chip[data-type="equipment"] { background: var(--cyan); }
+.signal-chip[data-type="theme"] { background: #b58cff; }
+.signal-chip[data-type="best"], .signal-chip[data-type="record"] { background: #f6f7ff; }
+.signal-track { position: relative; width: clamp(84px, 16vw, 150px); height: 6px; border-radius: 999px; background: rgba(246, 247, 255, 0.16); overflow: hidden; }
+.signal-fill { display: block; width: 0; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(32, 199, 245, 0.65), var(--cyan)); transition: width 120ms linear; }
+.signal-meter[data-state="imminent"] { border-color: rgba(251, 224, 71, 0.7); animation: signal-pulse 620ms ease-in-out infinite; }
+.signal-meter[data-state="imminent"] .signal-fill { background: linear-gradient(90deg, var(--cyan), var(--yellow)); }
+.signal-meter[data-state="reward"] { border-color: var(--yellow); background: rgba(45, 38, 8, 0.72); }
+.signal-meter[data-state="reward"] .signal-fill { background: var(--yellow); }
+.signal-meter[data-state="record"] { border-color: rgba(246, 247, 255, 0.6); }
+.signal-meter[data-state="record"] .signal-fill { background: linear-gradient(90deg, var(--pink), #f6f7ff); }
+@keyframes signal-pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.06); } }
 .playing-hint { position: absolute; top: clamp(68px, 12%, 92px); left: 50%; transform: translateX(-50%); margin: 0; padding: 6px 12px; border: 1px solid rgba(32, 199, 245, 0.22); border-radius: 999px; background: rgba(8, 11, 34, 0.58); color: rgba(246, 247, 255, 0.7); font-size: clamp(10px, 1.5vw, 14px); letter-spacing: 0.03em; pointer-events: none; white-space: nowrap; }
 .playing-hint[hidden] { display: none; }
 
@@ -72,4 +89,4 @@ button { font: inherit; color: inherit; }
 @media (pointer: fine) and (min-width: 800px) { .mobile-controls { opacity: 0; pointer-events: none; } }
 @media (max-width: 700px) { .hud { padding: 10px; } .state-panel { inset: 18% 7% 16%; border-radius: 18px; } .menu-panel { inset: 8% 5% 8%; min-height: min(84%, 560px); padding: 20px 14px; } .menu-panel h2 { font-size: clamp(22px, 6vw, 34px); } .loadout-list { grid-template-columns: 1fr; max-height: min(48%, 280px); } .hud-button { width: 36px; height: 36px; } }
 @media (max-width: 700px) and (orientation: portrait) { .menu-panel { inset: 5% 5% 5%; min-height: 90%; padding: 8px 10px; gap: 4px; } .menu-panel h2 { max-width: 100%; overflow: hidden; font-size: clamp(17px, 5vw, 22px); line-height: 1; white-space: nowrap; text-overflow: ellipsis; } .menu-panel h3 { font-size: 14px; } .menu-panel .loadout-list { min-height: 0; max-height: none; gap: 6px; padding: 2px; } .menu-panel .loadout-item { min-height: 64px; padding: 8px 10px; gap: 4px; } .menu-panel .primary-button { min-height: 40px; margin-top: 4px; } }
-@media (prefers-reduced-motion: reduce) { .loadout-item, .loadout-item button { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .loadout-item, .loadout-item button, .signal-fill { transition: none; } .signal-meter[data-state="imminent"] { animation: none; } }

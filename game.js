@@ -69,6 +69,52 @@ export function getNextMilestone(state) {
   return NEON_MILESTONES.find(item => !normalized.unlocked.includes(item.id)) || null;
 }
 
+const IMMINENT_WINDOW = 2.6;
+const REWARD_HOLD = 1.6;
+
+export function getRunObjective(elapsed, { unlocked = [], bestSeconds = 0 } = {}) {
+  const time = Math.max(0, Number(elapsed) || 0);
+  const best = Math.max(0, Number(bestSeconds) || 0);
+  const target = NEON_MILESTONES.find(item => item.threshold > time);
+  if (target) {
+    const index = NEON_MILESTONES.indexOf(target);
+    const from = index === 0 ? 0 : NEON_MILESTONES[index - 1].threshold;
+    const span = target.threshold - from;
+    const remaining = target.threshold - time;
+    return {
+      kind: 'milestone',
+      id: target.id,
+      type: target.type,
+      label: target.label,
+      target: target.threshold,
+      from,
+      ratio: span > 0 ? Math.min(1, Math.max(0, (time - from) / span)) : 1,
+      remaining,
+      imminent: remaining <= IMMINENT_WINDOW,
+      owned: unlocked.includes(target.id)
+    };
+  }
+  const last = NEON_MILESTONES[NEON_MILESTONES.length - 1].threshold;
+  if (best > time) {
+    const from = Math.max(last, 0);
+    const span = best - from;
+    const remaining = best - time;
+    return {
+      kind: 'best',
+      id: 'personal-best',
+      type: 'best',
+      label: 'Personal Best',
+      target: best,
+      from,
+      ratio: span > 0 ? Math.min(1, Math.max(0, (time - from) / span)) : 1,
+      remaining,
+      imminent: remaining <= IMMINENT_WINDOW,
+      owned: false
+    };
+  }
+  return { kind: 'record', id: 'record', type: 'record', label: 'Record', target: time, from: last, ratio: 1, remaining: 0, imminent: false, owned: false };
+}
+
 export function resolveProgression(state, elapsed) {
   const previous = normalizeProgression(state);
   const safeElapsed = Math.max(0, Number(elapsed) || 0);
@@ -218,6 +264,14 @@ export function createProgressionStore(storage, notify = () => {}) {
   return {
     readProgression,
     getProgression: () => readProgression(),
+    applyMilestones(elapsed) {
+      readProgression();
+      const result = resolveProgression(progression, elapsed);
+      if (!result.newlyUnlocked.length) return { ...result, progression };
+      progression = result.progression;
+      save();
+      return result;
+    },
     completeRun(elapsed) {
       readProgression();
       const result = resolveProgression(progression, elapsed);
@@ -938,6 +992,9 @@ export async function bootstrap({
     title: documentRef.querySelector('#game-title'),
     start: documentRef.querySelector('#start-label'),
     playingHint: documentRef.querySelector('#playing-hint'),
+    signalMeter: documentRef.querySelector('#signal-meter'),
+    signalFill: documentRef.querySelector('#signal-fill'),
+    signalChip: documentRef.querySelector('#signal-chip'),
     mobileControls: documentRef.querySelector('#mobile-controls'),
     pauseButton: documentRef.querySelector('#pause-button'),
     restartButton: documentRef.querySelector('#restart-button'),
@@ -1026,16 +1083,37 @@ export async function bootstrap({
     setVisible(elements.menu, state === GAME_STATES.MENU);
     setVisible(elements.gameOver, state === GAME_STATES.GAME_OVER);
     setVisible(elements.playingHint, state === GAME_STATES.PLAYING);
+    setVisible(elements.signalMeter, state === GAME_STATES.PLAYING);
     setVisible(elements.mobileControls, state === GAME_STATES.PLAYING);
     if (elements.shell) elements.shell.dataset.state = state;
     syncProgressionUi();
   };
   const refreshHud = snapshot => {
     if (elements.score) elements.score.textContent = String(snapshot.score);
+    const objective = getRunObjective(snapshot.elapsed, {
+      unlocked: latestProgression.unlocked,
+      bestSeconds: Math.max(bestScore, snapshot.score) / 10
+    });
+    const rewarding = snapshot.elapsed < rewardHoldUntil && lastEarned;
+    const shown = rewarding ? lastEarned : objective;
+    if (elements.signalFill) elements.signalFill.style.width = `${Math.round((rewarding ? 1 : objective.ratio) * 100)}%`;
+    if (elements.signalChip) elements.signalChip.dataset.type = shown.type;
+    if (elements.signalMeter) {
+      elements.signalMeter.dataset.state = rewarding ? 'reward' : objective.kind === 'record' ? 'record' : objective.imminent ? 'imminent' : 'tracking';
+      elements.signalMeter.setAttribute('aria-label', rewarding
+        ? replaceTokens(copy('unlocked'), { label: rewardName(lastEarned.id) })
+        : objective.kind === 'record'
+          ? copy('runComplete')
+          : replaceTokens(copy('nextMilestone'), { label: objective.kind === 'best' ? copy('best') : rewardName(objective.id), seconds: Math.ceil(objective.target) }));
+    }
+    if (elements.playingHint && !elements.playingHint.hidden && (laneSwitches >= 2 || snapshot.elapsed >= 6)) {
+      setVisible(elements.playingHint, false);
+    }
   };
   const switchLane = () => {
     audio.unlock();
     audio.laneChange();
+    laneSwitches += 1;
     world.update(0, { switchLane: true });
   };
   const startFromInput = async () => {
@@ -1043,12 +1121,20 @@ export async function bootstrap({
     const wasReady = machine.getState() === GAME_STATES.READY;
     await machine.inputStart();
     if (wasReady) world.reset();
-    if (machine.getState() === GAME_STATES.PLAYING) runCompleted = false;
+    if (machine.getState() === GAME_STATES.PLAYING) {
+      runCompleted = false;
+      laneSwitches = 0;
+      rewardHoldUntil = 0;
+      lastEarned = null;
+    }
     syncUi();
   };
   const restart = async () => {
     await machine.restartAfterGameOver();
     world.reset();
+    laneSwitches = 0;
+    rewardHoldUntil = 0;
+    lastEarned = null;
     latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
     syncUi();
   };
@@ -1134,6 +1220,9 @@ export async function bootstrap({
   syncUi();
 
   let runCompleted = false;
+  let laneSwitches = 0;
+  let rewardHoldUntil = 0;
+  let lastEarned = null;
   let lastTime = 0;
   const frame = timestamp => {
     const dt = lastTime ? (timestamp - lastTime) / 1000 : 0;
@@ -1141,6 +1230,15 @@ export async function bootstrap({
     if (machine.getState() === GAME_STATES.PLAYING) {
       world.update(dt);
       const snapshot = world.snapshot();
+      const earned = progressionStore.applyMilestones(snapshot.elapsed);
+      if (earned.newlyUnlocked.length) {
+        latestProgressionResult = earned;
+        latestProgression = earned.progression;
+        rewardHoldUntil = snapshot.elapsed + REWARD_HOLD;
+        lastEarned = earned.newlyUnlocked[earned.newlyUnlocked.length - 1];
+        audio.unlock();
+        syncProgressionUi();
+      }
       refreshHud(snapshot);
       if (!runCompleted && world.isCollision()) {
         runCompleted = true;

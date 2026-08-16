@@ -20,6 +20,11 @@
           <button id="pause-button" class="hud-button" type="button" data-action="pause" aria-label="Pause game">Ⅱ</button>
         </header>
 
+        <div id="signal-meter" class="signal-meter" data-state="tracking" hidden>
+          <span id="signal-chip" class="signal-chip" data-type="form"></span>
+          <span class="signal-track"><span id="signal-fill" class="signal-fill"></span></span>
+        </div>
+
         <p id="playing-hint" class="playing-hint" data-i18n="controlHint" hidden>Each tap switches lanes</p>
 
         <section id="ready-panel" class="state-panel" hidden>
