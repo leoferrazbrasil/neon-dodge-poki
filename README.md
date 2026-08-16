@@ -4,7 +4,7 @@ MVP hipercasual WebGL para navegadores, estruturado para publicação multiplata
 
 ## Estado
 
-O repositório contém o MVP implementado, sua especificação, os planos de publicação e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 93.333 bytes nos quatro arquivos principais. O slug atual `neon-dodge-poki` é histórico; o produto se chama **Neon Dodge** e não é exclusivo de uma plataforma.
+O repositório contém o MVP implementado, sua especificação, os planos de publicação e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 93.333 bytes nos quatro arquivos principais. O produto e o repositório se chamam **Neon Dodge** e não são exclusivos de uma plataforma.
 
 ## Documentação
 
@@ -92,4 +92,4 @@ Consulte o [plano de avanço por plataforma](docs/platforms/2026-08-15-platform-
 
 ## Organização local
 
-O repositório deve ser aberto a partir da pasta `neon-dodge-poki`. O cofre Obsidian e as referências externas ficam como diretórios irmãos no workspace e não fazem parte do build ou do histórico do jogo. O nome da pasta/slug não limita os destinos de publicação do Neon Dodge.
+O repositório deve ser aberto a partir da pasta `neon-dodge`. O cofre Obsidian e as referências externas ficam como diretórios irmãos no workspace e não fazem parte do build ou do histórico do jogo.

@@ -4,7 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildThumbnail } from '../tools/build-thumbnail.mjs';
+import { buildCover, COVER_FORMATS } from '../tools/build-covers.mjs';
+
+const formato = id => COVER_FORMATS.find(item => item.id === id);
+const buildThumbnail = () => buildCover(formato('thumbnail-628'));
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const json = JSON.parse(fs.readFileSync(path.join(root, 'strings.json'), 'utf8'));
@@ -74,7 +77,7 @@ test('a thumbnail apresenta NOVA e os Glitches em uma única ideia visual', () =
 });
 
 test('o arquivo publicado da thumbnail acompanha o gerador', () => {
-  const disco = fs.readFileSync(path.join(root, 'store', 'thumbnail-628.svg'), 'utf8');
+  const disco = fs.readFileSync(path.join(root, 'store', 'covers', 'thumbnail-628.svg'), 'utf8');
   assert.equal(disco.trim(), buildThumbnail().trim());
 });
 
@@ -83,4 +86,60 @@ test('os metadados de submissão declaram os itens exigidos pela plataforma', ()
   for (const item of ['Faixa etária', 'Controles', 'Localização', 'Thumbnail', 'Privacidade', 'Pendências']) {
     assert.ok(doc.includes(item), `metadado ausente: ${item}`);
   }
+});
+
+test('os três formatos de capa exigidos pelo CrazyGames existem com as dimensões corretas', () => {
+  const exigidos = { landscape: [1920, 1080], portrait: [800, 1200], square: [800, 800] };
+  for (const [id, [largura, altura]] of Object.entries(exigidos)) {
+    const spec = COVER_FORMATS.find(item => item.id === id);
+    assert.ok(spec, `formato ausente: ${id}`);
+    assert.equal(spec.width, largura, id);
+    assert.equal(spec.height, altura, id);
+    const svg = buildCover(spec);
+    assert.match(svg, new RegExp(`viewBox="0 0 ${largura} ${altura}"`));
+    assert.match(svg, new RegExp(`<rect width="${largura}" height="${altura}"`), `${id} não é full bleed`);
+  }
+});
+
+test('as capas seguem as proibições de Game Covers', () => {
+  for (const spec of COVER_FORMATS) {
+    const svg = buildCover(spec);
+    assert.ok(!/<image/.test(svg), `${spec.id} usa imagem externa`);
+    assert.ok(!/stroke=/.test(svg), `${spec.id} desenha borda`);
+    const textos = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map(m => m[1]);
+    for (const texto of textos) {
+      assert.equal(texto, 'NEON DODGE', `${spec.id} escreve algo além do título: ${texto}`);
+    }
+    if (!spec.title) assert.deepEqual(textos, [], `${spec.id} não deveria ter texto`);
+  }
+});
+
+test('os PNG publicados existem e batem com as dimensões declaradas', () => {
+  for (const spec of COVER_FORMATS) {
+    const arquivo = path.join(root, 'store', 'covers', `${spec.id}.png`);
+    const bytes = fs.readFileSync(arquivo);
+    assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', `${spec.id} não é PNG`);
+    assert.equal(bytes.readUInt32BE(16), spec.width, `${spec.id} largura`);
+    assert.equal(bytes.readUInt32BE(20), spec.height, `${spec.id} altura`);
+    assert.ok(bytes.length < 50 * 1024 * 1024, `${spec.id} excede o limite`);
+  }
+});
+
+test('as capas são determinísticas e reproduzíveis a partir do gerador', () => {
+  for (const spec of COVER_FORMATS) {
+    assert.equal(buildCover(spec), buildCover(spec), spec.id);
+    const disco = fs.readFileSync(path.join(root, 'store', 'covers', `${spec.id}.svg`), 'utf8');
+    assert.equal(disco.trim(), buildCover(spec).trim(), `${spec.id} descolou do gerador`);
+  }
+});
+
+test('o pacote do CrazyGames declara audiência 13+, PEGI 12 e os controles', () => {
+  const doc = fs.readFileSync(path.join(root, 'store', 'crazygames', 'SUBMISSION.md'), 'utf8');
+  assert.match(doc, /aged 13 or over/i);
+  assert.match(doc, /PEGI 12 compliant/i);
+  assert.ok(!/9\s*[-–to]+\s*12/.test(doc), 'o pacote não pode posicionar o jogo para 9 a 12 anos');
+  for (const item of ['Short description', 'Long description', 'Controls', 'Age rating', 'Languages', 'Preview videos']) {
+    assert.ok(doc.includes(item), `seção ausente: ${item}`);
+  }
+  assert.ok(!/[ãõçáéíóúâêô]/i.test(doc.replace(/Portuguese \(Brazil\)/g, '')), 'o pacote deve estar em inglês');
 });

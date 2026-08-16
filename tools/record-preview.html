@@ -1,0 +1,137 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Neon Dodge — gravador de preview</title>
+<style>
+body{background:#0b0e22;color:#e9ecff;font:14px system-ui;margin:0;padding:24px}
+h1{font-size:18px;margin:0 0 8px}
+p{color:#a9b2d8;max-width:70ch;line-height:1.5}
+button{margin:6px 8px 6px 0;padding:10px 16px;border:1px solid #20c7f5;border-radius:999px;background:#101537;color:#20c7f5;font-weight:700;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+a{color:#fbe047;display:block;margin:8px 0}
+#palco{position:fixed;left:-10000px;top:0}
+#estado{margin-top:12px;color:#fbe047;font-weight:700}
+</style>
+<h1>Gravador de preview</h1>
+<p>Grava o jogo real, sem som, abrindo na capa estática. Regras aplicadas: 18 segundos, sem barras
+pretas, sem cursor, sem texto promocional. O arquivo sai em WebM; converta para MP4 se o portal exigir.</p>
+<button id="btn-landscape">Gravar landscape 1920x1080</button>
+<button id="btn-portrait">Gravar portrait 1080x1620</button>
+<div id="estado">pronto</div>
+<div id="saida"></div>
+<div id="palco"><div id="moldura" style="width:1280px"><canvas id="game-canvas"></canvas></div></div>
+
+<script type="module">
+import { bootstrap, createPlatformMock } from '../game.js';
+
+const DURACAO_MS = 18000;
+const CAPA_MS = 1400;
+const FORMATOS = {
+  landscape: { largura: 1920, altura: 1080, capa: 'landscape' },
+  portrait: { largura: 1080, altura: 1620, capa: 'portrait' }
+};
+
+const estado = document.querySelector('#estado');
+const saida = document.querySelector('#saida');
+const dizer = texto => { estado.textContent = texto; };
+
+async function carregarCapa(nome) {
+  const texto = await (await fetch(`../store/covers/${nome}.svg`)).text();
+  const url = URL.createObjectURL(new Blob([texto], { type: 'image/svg+xml;charset=utf-8' }));
+  const img = new Image();
+  await new Promise((ok, err) => { img.onload = ok; img.onerror = err; img.src = url; });
+  return img;
+}
+
+// Piloto automático determinístico: a gravação nunca mostra uma morte precoce.
+function pilotar(app) {
+  const s = app.world.snapshot();
+  const zona = o => o.x > s.player.x - 0.09 && o.x < s.player.x + 0.40;
+  const minha = s.obstacles.some(o => o.lane === s.player.targetLane && zona(o));
+  const outra = s.obstacles.some(o => o.lane !== s.player.targetLane && zona(o));
+  if (minha && !outra) app.world.update(0, { switchLane: true });
+}
+
+async function gravar(chave) {
+  const formato = FORMATOS[chave];
+  document.querySelectorAll('button').forEach(b => { b.disabled = true; });
+  dizer('preparando…');
+
+  localStorage.setItem('neon-dodge-progression-v1', JSON.stringify({
+    version: 1, highestMilestone: 45,
+    unlocked: ['form-default', 'skin-cyan', 'theme-city', 'form-evolved', 'skin-magenta', 'skin-amber'],
+    equipped: { form: 'form-evolved', skin: 'skin-amber', equipment: null, theme: 'theme-city' }
+  }));
+
+  const capa = await carregarCapa(formato.capa);
+  const fila = [];
+  const app = await bootstrap({
+    documentRef: document,
+    sdk: createPlatformMock(),
+    windowRef: { requestAnimationFrame: cb => fila.push(cb), addEventListener: () => {}, removeEventListener: () => {}, localStorage, devicePixelRatio: 1 }
+  });
+  const jogo = document.querySelector('#game-canvas');
+  document.querySelector('canvas').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+
+  const alvo = document.createElement('canvas');
+  alvo.width = formato.largura;
+  alvo.height = formato.altura;
+  const ctx = alvo.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+
+  const fluxo = alvo.captureStream(60);
+  const partes = [];
+  const tipo = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+  const gravador = new MediaRecorder(fluxo, { mimeType: tipo, videoBitsPerSecond: 8_000_000 });
+  gravador.ondataavailable = e => { if (e.data.size) partes.push(e.data); };
+
+  const desenharJogo = () => {
+    const escala = formato.largura / jogo.width;
+    const altura = jogo.height * escala;
+    const topo = (formato.altura - altura) / 2;
+    if (chave === 'portrait') {
+      // sem barras pretas: o fundo do jogo preenche o restante do quadro
+      ctx.drawImage(jogo, 0, 0, jogo.width, 1, 0, 0, formato.largura, topo + 2);
+      ctx.drawImage(jogo, 0, jogo.height - 1, jogo.width, 1, 0, topo + altura - 2, formato.largura, formato.altura - topo - altura + 2);
+    }
+    ctx.drawImage(jogo, 0, topo, formato.largura, altura);
+  };
+
+  gravador.start();
+  const inicio = performance.now();
+  let t = 0;
+  await new Promise(resolve => {
+    const passo = () => {
+      const decorrido = performance.now() - inicio;
+      if (decorrido >= DURACAO_MS) { resolve(); return; }
+      if (decorrido < CAPA_MS) {
+        ctx.drawImage(capa, 0, 0, formato.largura, formato.altura);
+      } else {
+        pilotar(app);
+        const cbs = fila.splice(0);
+        t += 1000 / 60;
+        for (const cb of cbs) cb(t);
+        desenharJogo();
+      }
+      dizer(`gravando ${(decorrido / 1000).toFixed(1)}s / ${DURACAO_MS / 1000}s`);
+      requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  });
+  gravador.stop();
+  await new Promise(r => { gravador.onstop = r; });
+
+  const blob = new Blob(partes, { type: 'video/webm' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `preview-${chave}.webm`;
+  link.textContent = `Baixar preview-${chave}.webm (${formato.largura}x${formato.altura}, ${Math.round(blob.size / 1024 / 1024 * 10) / 10} MB)`;
+  saida.append(link);
+  dizer(`pronto: ${chave}, ${Math.round(blob.size / 1024 / 1024 * 10) / 10} MB`);
+  document.querySelectorAll('button').forEach(b => { b.disabled = false; });
+  return { chave, bytes: blob.size, largura: formato.largura, altura: formato.altura };
+}
+
+document.querySelector('#btn-landscape').addEventListener('click', () => gravar('landscape'));
+document.querySelector('#btn-portrait').addEventListener('click', () => gravar('portrait'));
+window.gravar = gravar;
+</script>

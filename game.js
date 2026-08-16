@@ -135,7 +135,9 @@ const sleep = milliseconds => milliseconds > 0
   ? new Promise(resolve => setTimeout(resolve, milliseconds))
   : Promise.resolve();
 
-export function createPokiMock({ commercialBreakDuration = 0 } = {}) {
+const PLATFORM_PROFILES = Object.freeze(['neutral', 'poki']);
+
+export function createPlatformMock({ commercialBreakDuration = 0 } = {}) {
   const events = [];
   return {
     events,
@@ -150,7 +152,7 @@ export function createPokiMock({ commercialBreakDuration = 0 } = {}) {
   };
 }
 
-export function createPokiController(sdk) {
+export function createPlatformController(sdk) {
   let gameplayActive = false;
   let gameplayStopped = true;
   let loadingFinished = false;
@@ -994,14 +996,14 @@ function replaceTokens(template, values) {
 }
 
 export async function bootstrap({
-  sdk = createPokiMock(),
+  sdk = createPlatformMock(),
   loadStrings = async () => LOCAL_STRINGS,
   compileShaders = async () => {},
   onReady = () => {},
   documentRef = globalThis.document,
   windowRef = globalThis.window
 } = {}) {
-  const controller = createPokiController(sdk);
+  const controller = createPlatformController(sdk);
   const loadedStrings = Promise.resolve().then(loadStrings).catch(() => LOCAL_STRINGS);
   const compiledShaders = Promise.resolve().then(compileShaders).catch(() => undefined);
   await controller.finishLoading(loadedStrings, compiledShaders);
@@ -1376,11 +1378,29 @@ export async function bootstrap({
   return { controller, machine, world, renderer, storage, progression: progressionStore };
 }
 
+// Aliases mantidos para a integração Poki, que consome estes nomes.
+export const createPokiMock = createPlatformMock;
+export const createPokiController = createPlatformController;
+
+export function readPlatformProfile(documentRef = globalThis.document) {
+  const declared = documentRef?.documentElement?.dataset?.platform;
+  return PLATFORM_PROFILES.includes(declared) ? declared : 'neutral';
+}
+
+// O perfil neutro não expõe global de nenhum portal. CrazyGames proíbe branding
+// de outros portais no jogo, e a Poki injeta o SDK real pela própria plataforma.
+export function exposePlatformGlobals(sdk, profile, target = globalThis) {
+  if (profile !== 'poki') return null;
+  target.PokiSDK = sdk;
+  return sdk;
+}
+
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  const pokiSdk = createPokiMock({ commercialBreakDuration: 420 });
-  globalThis.PokiSDK = pokiSdk;
-  window.PokiSDK = pokiSdk;
+  const platformSdk = createPlatformMock({ commercialBreakDuration: 420 });
+  const profile = readPlatformProfile(document);
+  exposePlatformGlobals(platformSdk, profile, globalThis);
+  exposePlatformGlobals(platformSdk, profile, window);
   window.addEventListener('DOMContentLoaded', () => {
-    bootstrap({ sdk: pokiSdk }).catch(() => undefined);
+    bootstrap({ sdk: platformSdk }).catch(() => undefined);
   }, { once: true });
 }

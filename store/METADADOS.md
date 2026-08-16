@@ -27,10 +27,10 @@ Sete idiomas completos, com as mesmas vinte e oito chaves: inglês, português d
 
 ## Thumbnail
 
-- Origem: `store/thumbnail-628.svg`, gerada por `tools/build-thumbnail.mjs` a partir das mesmas tabelas de arte do jogo.
+- Origem: `store/covers/thumbnail-628.svg`, gerada por `tools/build-covers.mjs` a partir das mesmas tabelas de arte do jogo.
 - Formato: quadrada, 628 por 628, full bleed, sem texto.
 - Ideia visual única: NOVA na forma Plasma diante de dois Glitches sobre a pista.
-- Regenerar com `node tools/build-thumbnail.mjs` sempre que a arte mudar.
+- Regenerar com `node tools/build-covers.mjs` sempre que a arte mudar; `tools/rasterize-covers.html` produz os PNG.
 
 ## Privacidade e direitos
 

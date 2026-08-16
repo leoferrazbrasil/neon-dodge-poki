@@ -34,7 +34,8 @@ test('onboarding explica iniciar e alternar faixa', () => {
 
 test('mock Poki fica exposto no escopo global do navegador', () => {
   const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
-  assert.match(source, /globalThis\.PokiSDK/);
+  // o global de portal passou a ser condicionado ao perfil declarado
+  assert.match(source, /exposePlatformGlobals/);
 });
 
 test('locale ativo atualiza o idioma semântico do documento', () => {
