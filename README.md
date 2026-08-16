@@ -18,6 +18,7 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 - [Plano de Evolução Neon](docs/superpowers/plans/2026-08-15-neon-dodge-evolucao-neon.md)
 - [Plano de Mundo e Elenco](docs/superpowers/plans/2026-08-15-neon-dodge-mundo-e-elenco.md)
 - [Plano de Objetivo visível](docs/superpowers/plans/2026-08-15-neon-dodge-objetivo-visivel.md)
+- [Plano de avanço por plataforma](docs/platforms/2026-08-15-platform-advancement.md)
 - Cofre Obsidian local: `D:\LEONARDO\Games\cofre-games`
 
 ## Restrições principais
