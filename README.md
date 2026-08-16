@@ -1,10 +1,10 @@
 # Neon Dodge
 
-MVP hipercasual WebGL para prova de conceito técnica na Poki.
+MVP hipercasual WebGL para navegadores, estruturado para publicação multiplataforma.
 
 ## Estado
 
-O repositório contém o MVP implementado, sua especificação, o plano e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 92.399 bytes nos quatro arquivos principais.
+O repositório contém o MVP implementado, sua especificação, os planos de publicação e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 93.333 bytes nos quatro arquivos principais. O slug atual `neon-dodge-poki` é histórico; o produto se chama **Neon Dodge** e não é exclusivo de uma plataforma.
 
 ## Documentação
 
@@ -26,9 +26,20 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 - WebGL2 puro com fallback local.
 - Sem CDN, fontes externas, analytics, backend ou requests de rede no runtime.
 - Canvas lógico 16:9 com suporte desktop, portrait e landscape.
-- Mock local do PokiSDK com `gameLoadingFinished`, `gameplayStart`, `gameplayStop` e `commercialBreak`.
+- Adaptador de plataforma isolado, com perfil neutro por padrão e mocks locais apenas para validar contratos de portal.
 - Persistência protegida contra falhas de `localStorage`.
 - Progressão local com formas, skins, equipamento visual e fases temáticas.
+
+## Perfis de publicação
+
+O jogo é desenvolvido uma vez no `base-offline` e recebe pacotes de publicação separados. O runtime de gameplay não depende de APIs de um portal.
+
+- **Base offline:** build neutro, sem branding, SDK real ou requests externos.
+- **CrazyGames Basic:** pacote com metadados, capas e vídeos próprios; SDK opcional e monetização desativada durante o Basic Launch.
+- **Poki:** aplicação de desenvolvedor, playtest e SDK real somente após acesso autorizado pelo portal.
+- **CrazyGames Full:** etapa posterior, dependente de métricas do Basic Launch, SDK real e nova QA.
+
+Consulte o [plano de avanço por plataforma](docs/platforms/2026-08-15-platform-advancement.md) antes de preparar uma entrega.
 
 ## Core loop atual
 
@@ -49,8 +60,8 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 
 - Sete idiomas completos com as mesmas vinte e oito chaves: en, pt-BR, es, fr, it, de e tr.
 - Áudio de recompensa em acorde e aviso sonoro na aproximação do marco.
-- Thumbnail 628x628 em `store/thumbnail-628.svg`, gerada por `node tools/build-thumbnail.mjs` a partir das tabelas de arte do jogo.
-- Metadados de submissão em `store/METADADOS.md`.
+- Thumbnail quadrada em `store/thumbnail-628.svg` e capas de publicação em `store/covers/`, geradas a partir das tabelas de arte do jogo.
+- Metadados-base de submissão em `store/METADADOS.md`; cada plataforma exige revisão própria de idioma, faixa etária, descrição e campos do portal.
 - Carga medida: DOM interativo em 57 ms, carga completa em 406 ms, primeira ação até gameplay em 84 ms.
 
 ## Objetivo visível durante a corrida
@@ -81,4 +92,4 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 
 ## Organização local
 
-O repositório deve ser aberto a partir da pasta `neon-dodge-poki`. O cofre Obsidian e as referências externas ficam como diretórios irmãos no workspace e não fazem parte do build ou do histórico do jogo.
+O repositório deve ser aberto a partir da pasta `neon-dodge-poki`. O cofre Obsidian e as referências externas ficam como diretórios irmãos no workspace e não fazem parte do build ou do histórico do jogo. O nome da pasta/slug não limita os destinos de publicação do Neon Dodge.
