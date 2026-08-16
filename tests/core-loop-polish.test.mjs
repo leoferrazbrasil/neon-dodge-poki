@@ -97,17 +97,21 @@ test('cada tema possui cenário visual procedural próprio', () => {
   assert.ok(city.every(item => item.kind && Number.isFinite(item.x)));
 });
 
-test('coleção usa cards amplos e alvos de toque acessíveis', () => {
+test('a coleção usa cards uniformes e alvos de toque acessíveis', () => {
   const css = fs.readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
   const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
-  assert.match(css, /\.menu-panel[^}]*min-height:\s*min\(/s);
-  assert.match(css, /\.loadout-list[^}]*gap:\s*(1[02]|12)px/s);
-  assert.match(css, /\.loadout-item[^}]*min-height:\s*(?:64|72)px/s);
-  assert.match(css, /\.loadout-action[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.loadout-item\[data-action="equip"\][^}]*touch-action:\s*manipulation/s);
-  assert.match(css, /touch-action:\s*manipulation/);
+  // o card inteiro é o controle: sem pílula interna competindo com o CTA primário
+  assert.ok(!css.includes('.loadout-action'), 'a pílula interna de ação deve ter sido removida');
+  assert.ok(!source.includes('loadout-action'), 'o runtime não deve mais criar a pílula de ação');
+  assert.match(source, /card\.type = 'button'/);
+  assert.match(css, /\.loadout-item[^}]*min-height:\s*(?:[6-9]\d|1\d\d)px/s);
+  // altura uniforme com 7 idiomas: o nome reserva sempre duas linhas
+  assert.match(css, /\.loadout-name[^}]*line-clamp:\s*2/s);
+  assert.match(css, /\.loadout-item[^}]*touch-action:\s*manipulation/s);
+  // grade que se adapta à largura, sem coluna fixa
+  assert.match(css, /\.loadout-grid[^}]*repeat\(auto-fill, minmax\(/s);
+  assert.match(css, /\.loadout-item:focus-visible/);
   assert.match(css, /orientation:\s*portrait/);
   assert.match(css, /\.menu-panel \.loadout-list[^}]*min-height:\s*0/s);
-  assert.match(source, /row\.setAttribute\('role', 'button'\)/);
   assert.match(source, /if \(state === GAME_STATES\.MENU\) return;/);
 });

@@ -14,12 +14,18 @@ const forbiddenPatterns = [
   /<link\b[^>]*\bhref\s*=\s*["'](?!\.\/)[^"']+["']/i
 ];
 
+// O namespace XML do SVG é um identificador, não um endpoint: nada é buscado na rede.
+// A exceção é literal e exata para não abrir espaço a nenhuma outra URL.
+// Só vale quando é a string inteira entre aspas; qualquer caractere a mais continua proibido.
+const SVG_NAMESPACE = /(['"])http:\/\/www\.w3\.org\/2000\/svg\1/g;
+
 export function scanRuntimeFiles(entries, maxBytes = MAX_RUNTIME_BYTES) {
   const violations = [];
   for (const entry of entries) {
-    const content = typeof entry === 'string' ? entry : entry.content;
+    const raw = typeof entry === 'string' ? entry : entry.content;
+    const content = raw.replace(SVG_NAMESPACE, "''");
     const name = typeof entry === 'string' ? 'fixture' : entry.name;
-    if (Buffer.byteLength(content, 'utf8') > maxBytes) violations.push(`${name}: exceeds ${maxBytes} bytes`);
+    if (Buffer.byteLength(raw, 'utf8') > maxBytes) violations.push(`${name}: exceeds ${maxBytes} bytes`);
     for (const pattern of forbiddenPatterns) {
       if (pattern.test(content)) violations.push(`${name}: matches ${pattern}`);
     }

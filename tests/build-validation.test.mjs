@@ -14,3 +14,10 @@ test('auditoria aceita apenas conteúdo local limpo', () => {
   ]);
   assert.equal(result.ok, true);
 });
+
+test('a exceção do namespace SVG é literal e não libera outras URLs', () => {
+  assert.equal(scanRuntimeFiles([{ name: 'a', content: "createElementNS('http://www.w3.org/2000/svg', 'svg')" }]).ok, true);
+  assert.equal(scanRuntimeFiles([{ name: 'b', content: "src='http://www.w3.org/2000/svg/evil.js'" }]).ok, false);
+  assert.equal(scanRuntimeFiles([{ name: 'c', content: "fetch('https://cdn.example.com/a.js')" }]).ok, false);
+  assert.equal(scanRuntimeFiles([{ name: 'd', content: "url('http://exemplo.com/f.woff')" }]).ok, false);
+});

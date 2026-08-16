@@ -232,6 +232,15 @@ export function createStorageAdapter(storage, notify = () => {}) {
   };
 }
 
+const STARTER_REWARDS = Object.freeze(['form-default', 'skin-cyan', 'theme-city']);
+
+export function findReward(rewardId) {
+  const milestone = NEON_MILESTONES.find(item => item.id === rewardId);
+  if (milestone) return { id: milestone.id, type: milestone.type };
+  if (STARTER_REWARDS.includes(rewardId)) return { id: rewardId, type: rewardId.split('-')[0] };
+  return null;
+}
+
 export function createProgressionStore(storage, notify = () => {}) {
   let progression = createInitialProgression();
   let loaded = false;
@@ -281,7 +290,7 @@ export function createProgressionStore(storage, notify = () => {}) {
     },
     equipReward(rewardId) {
       readProgression();
-      const reward = NEON_MILESTONES.find(item => item.id === rewardId);
+      const reward = findReward(rewardId);
       if (!reward || !progression.unlocked.includes(reward.id)) return progression;
       progression = {
         ...progression,
@@ -432,16 +441,51 @@ function selectLogicalSize(width) {
   return LOGICAL_SIZES[2];
 }
 
+const THEME_PALETTES = Object.freeze({
+  'theme-city': Object.freeze({ background: '#080b22', lane: '#20c7f5', accent: '#24306b', playerAccent: '#73e6ff', obstacleAccent: '#ffb3c2' }),
+  'theme-crystal': Object.freeze({ background: '#101936', lane: '#75e7ff', accent: '#344c86', playerAccent: '#d4fbff', obstacleAccent: '#f2b5ff' }),
+  'theme-cosmic': Object.freeze({ background: '#170d2f', lane: '#d68cff', accent: '#5b2f79', playerAccent: '#f4d8ff', obstacleAccent: '#ff9dbd' })
+});
+
+const SKIN_COLORS = Object.freeze({ 'skin-cyan': '#fbe047', 'skin-magenta': '#ff6bd6', 'skin-amber': '#ffb347' });
+
+const LOADOUT_TYPES = Object.freeze(['form', 'skin', 'equipment', 'theme']);
+
+export function getThemePalette(id = 'theme-city') {
+  return THEME_PALETTES[id] || THEME_PALETTES['theme-city'];
+}
+
+export function getSkinColor(id = 'skin-cyan') {
+  return SKIN_COLORS[id] || SKIN_COLORS['skin-cyan'];
+}
+
+export function getLoadoutSections(progression) {
+  const state = normalizeProgression(progression);
+  const catalog = [
+    ...STARTER_REWARDS.map(id => ({ id, type: id.split('-')[0], threshold: 0 })),
+    ...NEON_MILESTONES.map(item => ({ id: item.id, type: item.type, threshold: item.threshold }))
+  ];
+  return LOADOUT_TYPES.map(type => ({
+    type,
+    items: catalog
+      .filter(entry => entry.type === type)
+      .sort((a, b) => a.threshold - b.threshold)
+      .map(entry => ({
+        id: entry.id,
+        type,
+        threshold: entry.threshold,
+        unlocked: state.unlocked.includes(entry.id),
+        equipped: state.equipped[type] === entry.id
+      }))
+  })).filter(section => section.items.length > 0);
+}
+
 export function getVisualStyle(progression) {
   const theme = progression?.equipped?.theme || 'theme-city';
   const skin = progression?.equipped?.skin || 'skin-cyan';
   const form = progression?.equipped?.form || 'form-default';
-  const themes = {
-    'theme-city': { background: '#080b22', lane: '#20c7f5', accent: '#24306b', playerAccent: '#73e6ff', obstacleAccent: '#ffb3c2' },
-    'theme-crystal': { background: '#101936', lane: '#75e7ff', accent: '#344c86', playerAccent: '#d4fbff', obstacleAccent: '#f2b5ff' },
-    'theme-cosmic': { background: '#170d2f', lane: '#d68cff', accent: '#5b2f79', playerAccent: '#f4d8ff', obstacleAccent: '#ff9dbd' }
-  };
-  const skins = { 'skin-cyan': '#fbe047', 'skin-magenta': '#ff6bd6', 'skin-amber': '#ffb347' };
+  const themes = THEME_PALETTES;
+  const skins = SKIN_COLORS;
   const activeTheme = themes[theme] || themes['theme-city'];
   return {
     ...activeTheme,
@@ -1037,37 +1081,95 @@ export async function bootstrap({
   const nextMilestoneText = milestone => milestone
     ? replaceTokens(copy('nextMilestone'), { label: rewardName(milestone.id), seconds: milestone.threshold })
     : copy('defaultReward');
+  const svgTag = (name, attrs) => {
+    const node = documentRef.createElementNS('http://www.w3.org/2000/svg', name);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+    return node;
+  };
+  const createSwatch = (type, id) => {
+    const svg = svgTag('svg', { viewBox: '0 0 40 40', 'aria-hidden': 'true', focusable: 'false' });
+    const palette = getThemePalette(latestProgression.equipped.theme);
+    if (type === 'form') {
+      svg.append(svgTag('polygon', {
+        points: getPlayerHull(id).map(([x, y]) => `${20 + x * 34},${20 + y * 34}`).join(' '),
+        fill: getSkinColor(latestProgression.equipped.skin)
+      }));
+      svg.append(svgTag('circle', { cx: 26, cy: 20, r: 4.4, fill: palette.playerAccent }));
+      svg.append(svgTag('circle', { cx: 27, cy: 20, r: 2, fill: palette.background }));
+    } else if (type === 'skin') {
+      svg.append(svgTag('circle', { cx: 20, cy: 20, r: 14, fill: getSkinColor(id) }));
+      svg.append(svgTag('circle', { cx: 20, cy: 20, r: 14, fill: 'none', stroke: palette.background, 'stroke-width': 2 }));
+    } else if (type === 'theme') {
+      const tones = getThemePalette(id);
+      [tones.background, tones.accent, tones.lane, tones.playerAccent].forEach((tone, index) => {
+        svg.append(svgTag('rect', { x: 6, y: 6 + index * 7.5, width: 28, height: 6, rx: 2, fill: tone }));
+      });
+    } else {
+      svg.append(svgTag('rect', { x: 8, y: 12, width: 24, height: 16, rx: 4, fill: palette.accent }));
+      svg.append(svgTag('rect', { x: 12, y: 17, width: 16, height: 6, rx: 3, fill: palette.lane }));
+    }
+    return svg;
+  };
+  const createLockIcon = () => {
+    const svg = svgTag('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false', class: 'loadout-lock' });
+    svg.append(svgTag('rect', { x: 5, y: 10.5, width: 14, height: 10, rx: 2.5, fill: '#fbe047' }));
+    svg.append(svgTag('path', { d: 'M8.4 10.5V8.2a3.6 3.6 0 0 1 7.2 0v2.3', fill: 'none', stroke: '#fbe047', 'stroke-width': 2.2, 'stroke-linecap': 'round' }));
+    svg.append(svgTag('circle', { cx: 12, cy: 15.4, r: 1.7, fill: '#0a0d24' }));
+    return svg;
+  };
   const renderLoadout = () => {
     if (!elements.loadoutList) return;
     elements.loadoutList.replaceChildren();
-    for (const rewardId of latestProgression.unlocked) {
-      const milestone = NEON_MILESTONES.find(item => item.id === rewardId);
-      const type = milestone?.type || rewardId.split('-')[0];
-      const equipped = latestProgression.equipped[type] === rewardId;
-      const row = documentRef.createElement('div');
-      row.className = 'loadout-item';
-      row.dataset.type = type;
-      row.dataset.equipped = String(equipped);
-      const label = documentRef.createElement('span');
-      const labelText = `${rewardTypeName(type)}: ${rewardName(rewardId)}`;
-      label.textContent = labelText;
-      row.append(label);
-      if (equipped) {
-        const marker = documentRef.createElement('span');
-        marker.textContent = copy('equipped');
-        row.append(marker);
-      } else if (milestone) {
-        row.dataset.action = 'equip';
-        row.dataset.rewardId = rewardId;
-        row.setAttribute('role', 'button');
-        row.tabIndex = 0;
-        row.setAttribute('aria-label', `${labelText}. ${copy('equip')}`);
-        const action = documentRef.createElement('span');
-        action.className = 'loadout-action';
-        action.textContent = copy('equip');
-        row.append(action);
+    for (const section of getLoadoutSections(latestProgression)) {
+      const group = documentRef.createElement('section');
+      group.className = 'loadout-group';
+      const heading = documentRef.createElement('h4');
+      heading.className = 'loadout-group-title';
+      heading.textContent = rewardTypeName(section.type);
+      group.append(heading);
+      const grid = documentRef.createElement('div');
+      grid.className = 'loadout-grid';
+      for (const item of section.items) {
+        const name = rewardName(item.id);
+        const card = documentRef.createElement('button');
+        card.type = 'button';
+        card.className = 'loadout-item';
+        card.dataset.type = item.type;
+        card.dataset.equipped = String(item.equipped);
+        card.dataset.locked = String(!item.unlocked);
+        const swatch = documentRef.createElement('span');
+        swatch.className = 'loadout-swatch';
+        swatch.append(createSwatch(item.type, item.id));
+        if (!item.unlocked) swatch.append(createLockIcon());
+        const text = documentRef.createElement('span');
+        text.className = 'loadout-text';
+        const title = documentRef.createElement('span');
+        title.className = 'loadout-name';
+        title.textContent = name;
+        const status = documentRef.createElement('span');
+        status.className = 'loadout-status';
+        status.textContent = item.equipped
+          ? copy('equipped')
+          : item.unlocked ? copy('equip') : `${item.threshold} ${copy('seconds')}`;
+        text.append(title, status);
+        card.append(swatch, text);
+        if (!item.unlocked) {
+          card.disabled = true;
+          card.setAttribute('aria-disabled', 'true');
+          card.setAttribute('aria-label', `${name}. ${item.threshold} ${copy('seconds')}`);
+        } else if (item.equipped) {
+          card.disabled = true;
+          card.setAttribute('aria-current', 'true');
+          card.setAttribute('aria-label', `${name}. ${copy('equipped')}`);
+        } else {
+          card.dataset.action = 'equip';
+          card.dataset.rewardId = item.id;
+          card.setAttribute('aria-label', `${name}. ${copy('equip')}`);
+        }
+        grid.append(card);
       }
-      elements.loadoutList.append(row);
+      group.append(grid);
+      elements.loadoutList.append(group);
     }
   };
   const syncProgressionUi = () => {
