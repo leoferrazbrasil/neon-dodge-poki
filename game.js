@@ -414,24 +414,87 @@ const OBSTACLE_SHAPES = Object.freeze({
 
 const SCENE_DECORATIONS = Object.freeze({
   'theme-city': Object.freeze([
-    Object.freeze({ kind: 'building', x: 0.05, y: 0.1, width: 0.08, height: 0.18, tone: 'accent' }),
-    Object.freeze({ kind: 'building', x: 0.18, y: 0.16, width: 0.06, height: 0.12, tone: 'lane' }),
-    Object.freeze({ kind: 'building', x: 0.78, y: 0.1, width: 0.1, height: 0.18, tone: 'accent' }),
-    Object.freeze({ kind: 'beacon', x: 0.92, y: 0.19, width: 0.012, height: 0.18, tone: 'playerAccent' })
+    Object.freeze({ kind: 'star', x: 0.12, y: 0.07, width: 0.03, height: 0.03, tone: 'playerAccent', depth: 0.12 }),
+    Object.freeze({ kind: 'star', x: 0.58, y: 0.05, width: 0.024, height: 0.024, tone: 'lane', depth: 0.12 }),
+    Object.freeze({ kind: 'building', x: 0.05, y: 0.10, width: 0.08, height: 0.18, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'building', x: 0.18, y: 0.16, width: 0.06, height: 0.12, tone: 'lane', depth: 0.38 }),
+    Object.freeze({ kind: 'building', x: 0.44, y: 0.12, width: 0.09, height: 0.16, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'building', x: 0.78, y: 0.10, width: 0.10, height: 0.18, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'beacon', x: 0.92, y: 0.19, width: 0.012, height: 0.18, tone: 'playerAccent', depth: 0.38 }),
+    Object.freeze({ kind: 'rail', x: 0.10, y: 0.79, width: 0.07, height: 0.05, tone: 'lane', depth: 1 }),
+    Object.freeze({ kind: 'rail', x: 0.52, y: 0.79, width: 0.07, height: 0.05, tone: 'lane', depth: 1 }),
+    Object.freeze({ kind: 'rail', x: 0.86, y: 0.79, width: 0.07, height: 0.05, tone: 'lane', depth: 1 })
   ]),
   'theme-crystal': Object.freeze([
-    Object.freeze({ kind: 'crystal', x: 0.1, y: 0.16, width: 0.1, height: 0.22, tone: 'lane' }),
-    Object.freeze({ kind: 'crystal', x: 0.24, y: 0.1, width: 0.06, height: 0.16, tone: 'accent' }),
-    Object.freeze({ kind: 'crystal', x: 0.82, y: 0.14, width: 0.12, height: 0.24, tone: 'playerAccent' }),
-    Object.freeze({ kind: 'beacon', x: 0.94, y: 0.2, width: 0.012, height: 0.2, tone: 'lane' })
+    Object.freeze({ kind: 'star', x: 0.30, y: 0.06, width: 0.028, height: 0.028, tone: 'playerAccent', depth: 0.12 }),
+    Object.freeze({ kind: 'star', x: 0.72, y: 0.08, width: 0.022, height: 0.022, tone: 'lane', depth: 0.12 }),
+    Object.freeze({ kind: 'crystal', x: 0.10, y: 0.16, width: 0.10, height: 0.22, tone: 'lane', depth: 0.38 }),
+    Object.freeze({ kind: 'crystal', x: 0.24, y: 0.10, width: 0.06, height: 0.16, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'crystal', x: 0.50, y: 0.14, width: 0.08, height: 0.20, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'crystal', x: 0.82, y: 0.14, width: 0.12, height: 0.24, tone: 'playerAccent', depth: 0.38 }),
+    Object.freeze({ kind: 'beacon', x: 0.94, y: 0.20, width: 0.012, height: 0.20, tone: 'lane', depth: 0.38 }),
+    Object.freeze({ kind: 'shard', x: 0.16, y: 0.79, width: 0.06, height: 0.06, tone: 'lane', depth: 1 }),
+    Object.freeze({ kind: 'shard', x: 0.58, y: 0.79, width: 0.06, height: 0.06, tone: 'lane', depth: 1 }),
+    Object.freeze({ kind: 'shard', x: 0.90, y: 0.79, width: 0.06, height: 0.06, tone: 'lane', depth: 1 })
   ]),
   'theme-cosmic': Object.freeze([
-    Object.freeze({ kind: 'star', x: 0.1, y: 0.12, width: 0.06, height: 0.06, tone: 'playerAccent' }),
-    Object.freeze({ kind: 'panel', x: 0.2, y: 0.1, width: 0.12, height: 0.08, tone: 'accent' }),
-    Object.freeze({ kind: 'orb', x: 0.82, y: 0.14, width: 0.1, height: 0.1, tone: 'lane' }),
-    Object.freeze({ kind: 'star', x: 0.94, y: 0.22, width: 0.05, height: 0.05, tone: 'playerAccent' })
+    Object.freeze({ kind: 'star', x: 0.10, y: 0.12, width: 0.06, height: 0.06, tone: 'playerAccent', depth: 0.12 }),
+    Object.freeze({ kind: 'star', x: 0.62, y: 0.06, width: 0.04, height: 0.04, tone: 'lane', depth: 0.12 }),
+    Object.freeze({ kind: 'star', x: 0.94, y: 0.22, width: 0.05, height: 0.05, tone: 'playerAccent', depth: 0.12 }),
+    Object.freeze({ kind: 'panel', x: 0.20, y: 0.10, width: 0.12, height: 0.08, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'panel', x: 0.48, y: 0.16, width: 0.10, height: 0.07, tone: 'accent', depth: 0.38 }),
+    Object.freeze({ kind: 'orb', x: 0.82, y: 0.14, width: 0.10, height: 0.10, tone: 'lane', depth: 0.38 }),
+    Object.freeze({ kind: 'orb', x: 0.34, y: 0.20, width: 0.06, height: 0.06, tone: 'playerAccent', depth: 0.38 }),
+    Object.freeze({ kind: 'shard', x: 0.14, y: 0.79, width: 0.06, height: 0.06, tone: 'lane', depth: 1 }),
+    Object.freeze({ kind: 'shard', x: 0.56, y: 0.79, width: 0.06, height: 0.06, tone: 'lane', depth: 1 }),
+    Object.freeze({ kind: 'shard', x: 0.92, y: 0.79, width: 0.06, height: 0.06, tone: 'lane', depth: 1 })
   ])
 });
+
+const PARALLAX_SPAN = 1.2;
+const DASH_STEP = 0.12;
+const DASH_LENGTH = 0.07;
+const BEACON_TRAVEL = 0.4;
+
+const ROAD_BANDS = Object.freeze([
+  Object.freeze({ id: 'bed', y: 0.28, height: 0.44, tone: 'accent', alpha: 0.28 }),
+  Object.freeze({ id: 'edge-top', y: 0.272, height: 0.012, tone: 'lane', alpha: 0.9 }),
+  Object.freeze({ id: 'edge-bottom', y: 0.716, height: 0.012, tone: 'lane', alpha: 0.9 }),
+  Object.freeze({ id: 'guide-top', y: 0.35, height: 0.008, tone: 'lane', alpha: 0.5 }),
+  Object.freeze({ id: 'guide-bottom', y: 0.63, height: 0.008, tone: 'lane', alpha: 0.5 })
+]);
+
+export function getRoadBands() {
+  return ROAD_BANDS;
+}
+
+export function getParallaxOffset(elapsed, speed, depth) {
+  const travelled = Math.max(0, Number(elapsed) || 0) * Math.max(0, Number(speed) || 0) * Math.max(0, Number(depth) || 0);
+  return travelled % PARALLAX_SPAN;
+}
+
+export function wrapParallaxX(x, offset) {
+  return (((x - offset) % PARALLAX_SPAN) + PARALLAX_SPAN) % PARALLAX_SPAN - 0.1;
+}
+
+export function getLaneDashes(elapsed, speed) {
+  const offset = (Math.max(0, Number(elapsed) || 0) * Math.max(0, Number(speed) || 0)) % DASH_STEP;
+  const dashes = [];
+  for (let x = -DASH_STEP; x < PARALLAX_SPAN; x += DASH_STEP) {
+    dashes.push({ x: x - offset, width: DASH_LENGTH, y: 0.49, height: 0.02 });
+  }
+  return dashes;
+}
+
+export function getActiveBeacons(elapsed) {
+  const time = Math.max(0, Number(elapsed) || 0);
+  const beacons = [];
+  for (const milestone of NEON_MILESTONES) {
+    const x = 0.16 + (milestone.threshold - time) * BEACON_TRAVEL;
+    if (x >= -0.18 && x <= 1.18) beacons.push({ id: milestone.id, threshold: milestone.threshold, x });
+  }
+  return beacons;
+}
 
 export function getPlayerShape(form = 'form-default') {
   return PLAYER_SHAPES[form] || PLAYER_SHAPES['form-default'];
@@ -468,25 +531,60 @@ function toPixels(shape, centerX, centerY, width, height, scaleX, scaleY) {
   return shape.map(([x, y]) => [(centerX + x * width) * scaleX, (centerY + y * height) * scaleY]);
 }
 
-function drawSceneArt(style, size, drawRect, drawPolygon) {
+function drawSceneArt(style, size, snapshot, drawRect, drawPolygon) {
   const scaleX = size.width;
   const scaleY = size.height;
-  const colorFor = tone => hexToRgba(style[tone] || style.accent, 0.42);
+  const elapsed = snapshot?.elapsed || 0;
+  const speed = snapshot?.speed || 0;
   for (const item of getSceneDecorations(style.theme)) {
-    const x = item.x * scaleX;
+    const depth = item.depth || 0.38;
+    const wrapped = wrapParallaxX(item.x, getParallaxOffset(elapsed, speed, depth));
+    const x = wrapped * scaleX;
     const y = item.y * scaleY;
     const width = item.width * scaleX;
     const height = item.height * scaleY;
-    if (item.kind === 'building' || item.kind === 'beacon' || item.kind === 'panel') {
-      drawRect(x, y, width, height, colorFor(item.tone));
-    } else if (item.kind === 'crystal') {
-      drawPolygon([[x, y - height / 2], [x + width / 2, y], [x, y + height / 2], [x - width / 2, y]], colorFor(item.tone));
+    const alpha = depth < 0.2 ? 0.55 : depth < 0.6 ? 0.42 : 0.6;
+    const color = hexToRgba(style[item.tone] || style.accent, alpha);
+    if (item.kind === 'building' || item.kind === 'beacon' || item.kind === 'panel' || item.kind === 'rail') {
+      drawRect(x, y, width, height, color);
+    } else if (item.kind === 'crystal' || item.kind === 'shard') {
+      drawPolygon([[x, y - height / 2], [x + width / 2, y], [x, y + height / 2], [x - width / 2, y]], color);
     } else if (item.kind === 'star') {
-      drawPolygon([[x, y - height / 2], [x + width * 0.18, y - height * 0.18], [x + width / 2, y], [x + width * 0.18, y + height * 0.18], [x, y + height / 2], [x - width * 0.18, y + height * 0.18], [x - width / 2, y], [x - width * 0.18, y - height * 0.18]], colorFor(item.tone));
+      drawPolygon([[x, y - height / 2], [x + width * 0.18, y - height * 0.18], [x + width / 2, y], [x + width * 0.18, y + height * 0.18], [x, y + height / 2], [x - width * 0.18, y + height * 0.18], [x - width / 2, y], [x - width * 0.18, y - height * 0.18]], color);
     } else if (item.kind === 'orb') {
-      drawPolygon([[x, y - height / 2], [x + width * 0.35, y - height * 0.35], [x + width / 2, y], [x + width * 0.35, y + height * 0.35], [x, y + height / 2], [x - width * 0.35, y + height * 0.35], [x - width / 2, y], [x - width * 0.35, y - height * 0.35]], colorFor(item.tone));
+      drawPolygon([[x, y - height / 2], [x + width * 0.35, y - height * 0.35], [x + width / 2, y], [x + width * 0.35, y + height * 0.35], [x, y + height / 2], [x - width * 0.35, y + height * 0.35], [x - width / 2, y], [x - width * 0.35, y - height * 0.35]], color);
     }
   }
+}
+
+function drawBeaconArt(style, size, snapshot, drawRect) {
+  const scaleX = size.width;
+  const scaleY = size.height;
+  for (const beacon of getActiveBeacons(snapshot?.elapsed || 0)) {
+    const x = beacon.x * scaleX;
+    const width = 0.014 * scaleX;
+    drawRect(x, 0.12 * scaleY, width, 0.16 * scaleY, hexToRgba(style.playerAccent, 0.5));
+    drawRect(x, 0.72 * scaleY, width, 0.16 * scaleY, hexToRgba(style.playerAccent, 0.5));
+    drawRect(x - width * 0.9, 0.1 * scaleY, width * 2.8, 0.024 * scaleY, hexToRgba(style.lane, 0.85));
+    drawRect(x - width * 0.9, 0.876 * scaleY, width * 2.8, 0.024 * scaleY, hexToRgba(style.lane, 0.85));
+  }
+}
+
+function drawRoadArt(style, size, snapshot, drawRect) {
+  const scaleX = size.width;
+  const scaleY = size.height;
+  for (const band of getRoadBands()) {
+    drawRect(0, band.y * scaleY, scaleX, band.height * scaleY, hexToRgba(style[band.tone] || style.accent, band.alpha));
+  }
+  for (const dash of getLaneDashes(snapshot?.elapsed || 0, snapshot?.speed || 0)) {
+    drawRect(dash.x * scaleX, dash.y * scaleY, dash.width * scaleX, dash.height * scaleY, hexToRgba(style.lane, 0.65));
+  }
+}
+
+function drawWorldArt(style, size, snapshot, drawRect, drawPolygon) {
+  drawSceneArt(style, size, snapshot, drawRect, drawPolygon);
+  drawRoadArt(style, size, snapshot, drawRect);
+  drawBeaconArt(style, size, snapshot, drawRect);
 }
 
 function drawPlayerArt(style, player, size, drawRect, drawPolygon) {
@@ -562,12 +660,7 @@ function createWebGLRenderer(canvas, gl) {
       gl.uniform2f(resolutionLocation, size.width, size.height);
       gl.clearColor(...hexToRgba(style.background));
       gl.clear(gl.COLOR_BUFFER_BIT);
-      const scaleX = size.width;
-      const scaleY = size.height;
-      drawSceneArt(style, size, drawRect, drawPolygon);
-      drawRect(0, scaleY * 0.49, scaleX, scaleY * 0.02, hexToRgba(style.accent));
-      drawRect(0, scaleY * 0.35, scaleX, scaleY * 0.008, hexToRgba(style.lane, 0.7));
-      drawRect(0, scaleY * 0.63, scaleX, scaleY * 0.008, hexToRgba(style.lane, 0.7));
+      drawWorldArt(style, size, snapshot, drawRect, drawPolygon);
       drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon);
       for (const obstacle of snapshot.obstacles) {
         drawObstacleArt(style, obstacle, size, drawRect, drawPolygon);
@@ -603,10 +696,7 @@ function createCanvasRenderer(canvas, ctx) {
       const style = getVisualStyle(progression);
       ctx.fillStyle = style.background;
       ctx.fillRect(0, 0, size.width, size.height);
-      drawSceneArt(style, size, drawRect, drawPolygon);
-      drawRect(0, size.height * 0.49, size.width, size.height * 0.02, hexToRgba(style.accent));
-      drawRect(0, size.height * 0.35, size.width, size.height * 0.008, hexToRgba(style.lane, 0.7));
-      drawRect(0, size.height * 0.63, size.width, size.height * 0.008, hexToRgba(style.lane, 0.7));
+      drawWorldArt(style, size, snapshot, drawRect, drawPolygon);
       drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon);
       for (const obstacle of snapshot.obstacles) drawObstacleArt(style, obstacle, size, drawRect, drawPolygon);
     },
