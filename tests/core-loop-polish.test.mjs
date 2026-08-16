@@ -59,11 +59,15 @@ test('loadout inicial usa a identidade Cidade Neon', () => {
 
 test('coleção usa cards amplos e alvos de toque acessíveis', () => {
   const css = fs.readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
+  const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
   assert.match(css, /\.menu-panel[^}]*min-height:\s*min\(/s);
   assert.match(css, /\.loadout-list[^}]*gap:\s*(1[02]|12)px/s);
   assert.match(css, /\.loadout-item[^}]*min-height:\s*(?:64|72)px/s);
-  assert.match(css, /\.loadout-item button[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.loadout-action[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.loadout-item\[data-action="equip"\][^}]*touch-action:\s*manipulation/s);
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /orientation:\s*portrait/);
   assert.match(css, /\.menu-panel \.loadout-list[^}]*min-height:\s*0/s);
+  assert.match(source, /row\.setAttribute\('role', 'button'\)/);
+  assert.match(source, /if \(state === GAME_STATES\.MENU\) return;/);
 });

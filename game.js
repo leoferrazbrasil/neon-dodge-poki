@@ -692,19 +692,23 @@ export async function bootstrap({
       row.dataset.type = type;
       row.dataset.equipped = String(equipped);
       const label = documentRef.createElement('span');
-      label.textContent = `${rewardTypeName(type)}: ${rewardName(rewardId)}`;
+      const labelText = `${rewardTypeName(type)}: ${rewardName(rewardId)}`;
+      label.textContent = labelText;
       row.append(label);
       if (equipped) {
         const marker = documentRef.createElement('span');
         marker.textContent = copy('equipped');
         row.append(marker);
       } else if (milestone) {
-        const button = documentRef.createElement('button');
-        button.type = 'button';
-        button.dataset.action = 'equip';
-        button.dataset.rewardId = rewardId;
-        button.textContent = copy('equip');
-        row.append(button);
+        row.dataset.action = 'equip';
+        row.dataset.rewardId = rewardId;
+        row.setAttribute('role', 'button');
+        row.tabIndex = 0;
+        row.setAttribute('aria-label', `${labelText}. ${copy('equip')}`);
+        const action = documentRef.createElement('span');
+        action.className = 'loadout-action';
+        action.textContent = copy('equip');
+        row.append(action);
       }
       elements.loadoutList.append(row);
     }
@@ -755,6 +759,11 @@ export async function bootstrap({
     latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
     syncUi();
   };
+  const equipReward = rewardId => {
+    latestProgression = progressionStore.equipReward(rewardId);
+    latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
+    syncUi();
+  };
   const handlePointer = event => {
     if (event.target.closest?.('[data-action="customize"]')) {
       machine.openMenu().then(syncUi);
@@ -762,9 +771,7 @@ export async function bootstrap({
     }
     if (event.target.closest?.('[data-action="equip"]')) {
       const rewardId = event.target.closest('[data-action="equip"]').dataset.rewardId;
-      latestProgression = progressionStore.equipReward(rewardId);
-      latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
-      syncUi();
+      equipReward(rewardId);
       return;
     }
     if (event.target.closest?.('[data-action="switch-lane"]')) {
@@ -783,19 +790,34 @@ export async function bootstrap({
       machine.openMenu().then(syncUi);
       return;
     }
+    if (event.target.closest?.('[data-action="resume"]')) {
+      if (machine.getState() === GAME_STATES.MENU) startFromInput();
+      return;
+    }
     const state = machine.getState();
     if (state === GAME_STATES.PLAYING) switchLane();
     else if (state === GAME_STATES.GAME_OVER) restart();
+    else if (state === GAME_STATES.MENU) return;
     else startFromInput();
   };
   documentRef.addEventListener('pointerdown', handlePointer, { passive: true });
   windowRef?.addEventListener('keydown', event => {
     if (event.repeat) return;
     if (['Space', 'ArrowUp', 'ArrowDown', 'Escape', 'KeyP'].includes(event.code)) event.preventDefault();
+    const actionTarget = event.target.closest?.('[data-action]');
+    if (actionTarget?.dataset.action === 'equip') {
+      if (event.code === 'Enter' || event.code === 'Space') equipReward(actionTarget.dataset.rewardId);
+      return;
+    }
+    if (actionTarget?.dataset.action === 'resume') {
+      if (event.code === 'Enter' || event.code === 'Space') startFromInput();
+      return;
+    }
     const state = machine.getState();
+    if (state === GAME_STATES.MENU) return;
     if (event.code === 'Escape' || event.code === 'KeyP') {
       if (state === GAME_STATES.PLAYING) machine.pause().then(syncUi);
-      else if (state === GAME_STATES.PAUSED || state === GAME_STATES.MENU) startFromInput();
+      else if (state === GAME_STATES.PAUSED) startFromInput();
       return;
     }
     if (event.code === 'Space') {
