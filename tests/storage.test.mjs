@@ -25,3 +25,15 @@ test('persistência normaliza score e mantém o maior valor', () => {
   assert.equal(adapter.writeBestScore(12.9), true);
   assert.equal(adapter.readBestScore(), 12);
 });
+
+test('persistência de score continua independente da progressão', () => {
+  const values = new Map();
+  const storage = {
+    getItem(key) { return values.get(key) ?? null; },
+    setItem(key, value) { values.set(key, value); }
+  };
+  const adapter = createStorageAdapter(storage);
+  adapter.writeBestScore(21);
+  assert.equal(values.get('neon-dodge-best-score'), '21');
+  assert.equal(values.has('neon-dodge-progression-v1'), false);
+});

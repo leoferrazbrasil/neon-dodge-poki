@@ -1,7 +1,7 @@
 ---
 title: Neon Dodge - Evolução Neon
 kind: specification
-status: approved-for-review
+status: implemented
 created: 2026-08-15
 updated: 2026-08-15
 ---
@@ -29,9 +29,12 @@ Implementar a **Evolução Neon**, composta por marcos de sobrevivência e recom
 | Marco inicial | Recompensa | Exibição |
 | ---: | --- | --- |
 | 15 segundos | Transformação do personagem | Game Over e próxima Ready |
-| 30 segundos | Skin de cor/energia | Game Over e coleção |
+| 30 segundos | Skin magenta | Game Over e coleção |
+| 45 segundos | Skin âmbar | Game Over e coleção |
 | 60 segundos | Equipamento visual | Game Over e coleção |
-| 90 segundos | Fase temática | Próxima rodada |
+| 90 segundos | Fase temática Cristal | Próxima rodada |
+| 120 segundos | Forma avançada | Game Over e próxima Ready |
+| 150 segundos | Fase temática Cósmica | Próxima rodada |
 
 Esses valores são o primeiro conjunto de produto e podem ser recalibrados depois do playtest sem mudar o contrato do sistema.
 
@@ -138,4 +141,4 @@ O primeiro ciclo deve comparar o Neon Dodge atual contra a versão com Evoluçã
 
 ## Decisão de implementação
 
-Especificação aprovada pelo usuário em 2026-08-15. A implementação deve começar somente após a revisão desta especificação escrita e a criação de um plano técnico separado.
+Especificação aprovada pelo usuário em 2026-08-15 e implementada no commit de evolução Neon após o plano técnico correspondente.

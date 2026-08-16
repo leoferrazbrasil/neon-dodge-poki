@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createPokiMock, createPokiController, createGameStateMachine, createGameWorld } from '../game.js';
+import { createPokiMock, createPokiController, createGameStateMachine, createGameWorld, createInitialProgression, resolveProgression } from '../game.js';
 
 test('gameplayStart ignora uma segunda chamada consecutiva', async () => {
   const sdk = createPokiMock();
@@ -57,4 +57,27 @@ test('colisão só ocorre quando os retângulos da mesma faixa se sobrepõem', (
   assert.equal(world.isCollision(), true);
   world.reset({ obstacleX: 0.16, obstacleLane: 1 });
   assert.equal(world.isCollision(), false);
+});
+
+test('desbloqueio visual não altera o contrato de start e stop', async () => {
+  const sdk = createPokiMock();
+  const controller = createPokiController(sdk);
+  const machine = createGameStateMachine(controller);
+  const progression = resolveProgression(createInitialProgression(), 16);
+  assert.equal(progression.newlyUnlocked[0].id, 'form-evolved');
+  await machine.finishLoading();
+  await machine.inputStart();
+  await machine.die();
+  await machine.restartAfterGameOver();
+  assert.deepEqual(sdk.events, ['gameplayStart', 'gameplayStop', 'commercialBreak']);
+});
+
+test('customização abre a partir de Ready sem iniciar gameplay', async () => {
+  const sdk = createPokiMock();
+  const controller = createPokiController(sdk);
+  const machine = createGameStateMachine(controller);
+  await machine.finishLoading();
+  await machine.openMenu();
+  assert.equal(machine.getState(), 'Menu');
+  assert.equal(controller.isGameplayActive(), false);
 });

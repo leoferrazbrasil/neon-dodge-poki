@@ -5,8 +5,8 @@ const LOGICAL_SIZES = Object.freeze([
 ]);
 
 const LOCAL_STRINGS = Object.freeze({
-  en: { title: 'Neon Dodge', start: 'Tap to start', controlHint: 'Each tap switches lanes', paused: 'PAUSED', takeABreath: 'Take a breath.', menu: 'MENU', readyWhen: 'Ready when you are.', runComplete: 'RUN COMPLETE', oneMore: 'One more?', pause: 'Pause', resume: 'Resume', restart: 'Restart', score: 'Score', best: 'Best', storageNotice: 'This session score will not be saved.' },
-  'pt-BR': { title: 'Neon Dodge', start: 'Toque para começar', controlHint: 'Cada toque alterna a faixa', paused: 'PAUSADO', takeABreath: 'Respire um pouco.', menu: 'MENU', readyWhen: 'Quando quiser, estamos prontos.', runComplete: 'FIM DA RODADA', oneMore: 'Mais uma?', pause: 'Pausar', resume: 'Continuar', restart: 'Reiniciar', score: 'Pontos', best: 'Recorde', storageNotice: 'A pontuação desta sessão não será salva.' },
+  en: { title: 'Neon Dodge', start: 'Tap to start', controlHint: 'Each tap switches lanes', paused: 'PAUSED', takeABreath: 'Take a breath.', menu: 'MENU', readyWhen: 'Ready when you are.', runComplete: 'RUN COMPLETE', oneMore: 'One more?', pause: 'Pause', resume: 'Resume', restart: 'Restart', score: 'Score', best: 'Best', storageNotice: 'This session score will not be saved.', customize: 'Customize', collection: 'Neon collection', nextMilestone: 'Next: {label} at {seconds}s', unlocked: 'Unlocked: {label}', noNewReward: 'Keep going to unlock the next form.', equipped: 'Equipped', equip: 'Equip', form: 'Form', skin: 'Skin', equipment: 'Equipment', theme: 'Theme', defaultReward: 'Your current loadout is ready.' },
+  'pt-BR': { title: 'Neon Dodge', start: 'Toque para começar', controlHint: 'Cada toque alterna a faixa', paused: 'PAUSADO', takeABreath: 'Respire um pouco.', menu: 'MENU', readyWhen: 'Quando quiser, estamos prontos.', runComplete: 'FIM DA RODADA', oneMore: 'Mais uma?', pause: 'Pausar', resume: 'Continuar', restart: 'Reiniciar', score: 'Pontos', best: 'Recorde', storageNotice: 'A pontuação desta sessão não será salva.', customize: 'Personalizar', collection: 'Coleção neon', nextMilestone: 'Próximo: {label} em {seconds}s', unlocked: 'Desbloqueado: {label}', noNewReward: 'Continue para liberar a próxima forma.', equipped: 'Equipado', equip: 'Usar', form: 'Forma', skin: 'Skin', equipment: 'Equipamento', theme: 'Tema', defaultReward: 'Seu visual atual está pronto.' },
   es: { title: 'Neon Dodge', start: 'Toca para empezar', controlHint: 'Cada toque cambia de carril', pause: 'Pausa', resume: 'Continuar', restart: 'Reiniciar', score: 'Puntuación', best: 'Mejor', storageNotice: 'La puntuación de esta sesión no se guardará.' },
   fr: { title: 'Neon Dodge', start: 'Touchez pour commencer', controlHint: 'Chaque touche change de voie', pause: 'Pause', resume: 'Reprendre', restart: 'Recommencer', score: 'Score', best: 'Record', storageNotice: 'Le score de cette session ne sera pas sauvegardé.' },
   it: { title: 'Neon Dodge', start: 'Tocca per iniziare', controlHint: 'Ogni tocco cambia corsia', pause: 'Pausa', resume: 'Riprendi', restart: 'Ricomincia', score: 'Punteggio', best: 'Record', storageNotice: 'Il punteggio di questa sessione non verrà salvato.' },
@@ -22,6 +22,68 @@ export const GAME_STATES = Object.freeze({
   MENU: 'Menu',
   GAME_OVER: 'Game Over'
 });
+
+const PROGRESSION_KEY = 'neon-dodge-progression-v1';
+
+export const NEON_MILESTONES = Object.freeze([
+  { threshold: 15, id: 'form-evolved', type: 'form', label: 'Pulse Form' },
+  { threshold: 30, id: 'skin-magenta', type: 'skin', label: 'Magenta Skin' },
+  { threshold: 45, id: 'skin-amber', type: 'skin', label: 'Amber Skin' },
+  { threshold: 60, id: 'equipment-visor', type: 'equipment', label: 'Neon Visor' },
+  { threshold: 90, id: 'theme-crystal', type: 'theme', label: 'Crystal Tunnel' },
+  { threshold: 120, id: 'form-advanced', type: 'form', label: 'Plasma Form' },
+  { threshold: 150, id: 'theme-cosmic', type: 'theme', label: 'Cosmic Lab' }
+]);
+
+export function createInitialProgression() {
+  return {
+    version: 1,
+    highestMilestone: 0,
+    unlocked: ['form-default', 'skin-cyan', 'theme-city'],
+    equipped: { form: 'form-default', skin: 'skin-cyan', equipment: null, theme: 'theme-city' }
+  };
+}
+
+function normalizeProgression(value) {
+  const initial = createInitialProgression();
+  const knownRewards = new Set([
+    ...initial.unlocked,
+    ...NEON_MILESTONES.map(item => item.id)
+  ]);
+  if (!value || value.version !== 1 || !Array.isArray(value.unlocked)) return initial;
+  const unlocked = [...new Set([...initial.unlocked, ...value.unlocked.filter(id => knownRewards.has(id))])];
+  const equipped = { ...initial.equipped, ...(value.equipped || {}) };
+  for (const [type, fallback] of Object.entries(initial.equipped)) {
+    if (equipped[type] !== null && !unlocked.includes(equipped[type])) equipped[type] = fallback;
+  }
+  return {
+    version: 1,
+    highestMilestone: Math.max(0, Number(value.highestMilestone) || 0),
+    unlocked,
+    equipped
+  };
+}
+
+export function getNextMilestone(state) {
+  const normalized = normalizeProgression(state);
+  return NEON_MILESTONES.find(item => !normalized.unlocked.includes(item.id)) || null;
+}
+
+export function resolveProgression(state, elapsed) {
+  const previous = normalizeProgression(state);
+  const safeElapsed = Math.max(0, Number(elapsed) || 0);
+  const newlyUnlocked = NEON_MILESTONES.filter(item => safeElapsed >= item.threshold && !previous.unlocked.includes(item.id));
+  const unlocked = [...previous.unlocked, ...newlyUnlocked.map(item => item.id)];
+  const equipped = { ...previous.equipped };
+  for (const reward of newlyUnlocked) equipped[reward.type] = reward.id;
+  const progression = {
+    ...previous,
+    unlocked,
+    equipped,
+    highestMilestone: Math.max(previous.highestMilestone, ...newlyUnlocked.map(item => item.threshold), 0)
+  };
+  return { progression, newlyUnlocked, nextMilestone: getNextMilestone(progression) };
+}
 
 const sleep = milliseconds => milliseconds > 0
   ? new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -124,6 +186,59 @@ export function createStorageAdapter(storage, notify = () => {}) {
   };
 }
 
+export function createProgressionStore(storage, notify = () => {}) {
+  let progression = createInitialProgression();
+  let loaded = false;
+  const reportFailure = () => {
+    notify('sessionNotPersisted');
+    return false;
+  };
+  const save = () => {
+    try {
+      if (!storage) return reportFailure();
+      storage.setItem(PROGRESSION_KEY, JSON.stringify(progression));
+      return true;
+    } catch {
+      return reportFailure();
+    }
+  };
+  const readProgression = () => {
+    if (loaded) return progression;
+    loaded = true;
+    try {
+      if (!storage) return reportFailure(), progression;
+      const raw = storage.getItem(PROGRESSION_KEY);
+      progression = normalizeProgression(raw ? JSON.parse(raw) : progression);
+    } catch {
+      reportFailure();
+      progression = createInitialProgression();
+    }
+    return progression;
+  };
+  return {
+    readProgression,
+    getProgression: () => readProgression(),
+    completeRun(elapsed) {
+      readProgression();
+      const result = resolveProgression(progression, elapsed);
+      progression = result.progression;
+      save();
+      return result;
+    },
+    equipReward(rewardId) {
+      readProgression();
+      const reward = NEON_MILESTONES.find(item => item.id === rewardId);
+      if (!reward || !progression.unlocked.includes(reward.id)) return progression;
+      progression = {
+        ...progression,
+        equipped: { ...progression.equipped, [reward.type]: reward.id }
+      };
+      save();
+      return progression;
+    }
+  };
+}
+
 export function createGameStateMachine(controller) {
   let state = GAME_STATES.BOOTING;
   return {
@@ -146,6 +261,8 @@ export function createGameStateMachine(controller) {
     async openMenu() {
       if (state === GAME_STATES.PLAYING) {
         await controller.stopGameplay();
+        state = GAME_STATES.MENU;
+      } else if (state === GAME_STATES.READY) {
         state = GAME_STATES.MENU;
       }
     },
@@ -258,6 +375,32 @@ function selectLogicalSize(width) {
   return LOGICAL_SIZES[2];
 }
 
+export function getVisualStyle(progression) {
+  const theme = progression?.equipped?.theme || 'theme-city';
+  const skin = progression?.equipped?.skin || 'skin-cyan';
+  const form = progression?.equipped?.form || 'form-default';
+  const themes = {
+    'theme-city': { background: '#080b22', lane: '#20c7f5', accent: '#24306b' },
+    'theme-crystal': { background: '#101936', lane: '#75e7ff', accent: '#344c86' },
+    'theme-cosmic': { background: '#170d2f', lane: '#d68cff', accent: '#5b2f79' }
+  };
+  const skins = { 'skin-cyan': '#fbe047', 'skin-magenta': '#ff6bd6', 'skin-amber': '#ffb347' };
+  return {
+    ...(themes[theme] || themes['theme-city']),
+    player: skins[skin] || skins['skin-cyan'],
+    obstacle: '#fa416b',
+    formScale: form === 'form-advanced' ? 1.08 : form === 'form-evolved' ? 1.04 : 1
+  };
+}
+
+function hexToRgba(hex, alpha = 1) {
+  const value = hex.replace('#', '');
+  const red = Number.parseInt(value.slice(0, 2), 16) / 255;
+  const green = Number.parseInt(value.slice(2, 4), 16) / 255;
+  const blue = Number.parseInt(value.slice(4, 6), 16) / 255;
+  return [red, green, blue, alpha];
+}
+
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -296,20 +439,26 @@ function createWebGLRenderer(canvas, gl) {
       canvas.height = Math.round(size.height * dpr);
       gl.viewport(0, 0, canvas.width, canvas.height);
     },
-    render(snapshot) {
+    render(snapshot, progression) {
+      const style = getVisualStyle(progression);
       gl.useProgram(program);
       gl.uniform2f(resolutionLocation, size.width, size.height);
-      gl.clearColor(0.025, 0.035, 0.09, 1);
+      gl.clearColor(...hexToRgba(style.background));
       gl.clear(gl.COLOR_BUFFER_BIT);
       const scaleX = size.width;
       const scaleY = size.height;
-      drawRect(0, scaleY * 0.49, scaleX, scaleY * 0.02, [0.18, 0.24, 0.48, 1]);
-      drawRect(0, scaleY * 0.35, scaleX, scaleY * 0.008, [0.12, 0.78, 0.96, 0.7]);
-      drawRect(0, scaleY * 0.63, scaleX, scaleY * 0.008, [0.12, 0.78, 0.96, 0.7]);
+      drawRect(0, scaleY * 0.49, scaleX, scaleY * 0.02, hexToRgba(style.accent));
+      drawRect(0, scaleY * 0.35, scaleX, scaleY * 0.008, hexToRgba(style.lane, 0.7));
+      drawRect(0, scaleY * 0.63, scaleX, scaleY * 0.008, hexToRgba(style.lane, 0.7));
       const player = snapshot.player;
-      drawRect((player.x - player.width / 2) * scaleX, (player.y - player.height / 2) * scaleY, player.width * scaleX, player.height * scaleY, [0.98, 0.88, 0.28, 1]);
+      const playerWidth = player.width * style.formScale;
+      const playerHeight = player.height * style.formScale;
+      if (progression?.equipped?.equipment === 'equipment-visor') {
+        drawRect((player.x - playerWidth * 0.7) * scaleX, (player.y - playerHeight * 0.68) * scaleY, playerWidth * 0.18 * scaleX, playerHeight * 1.36 * scaleY, hexToRgba(style.lane, 0.85));
+      }
+      drawRect((player.x - playerWidth / 2) * scaleX, (player.y - playerHeight / 2) * scaleY, playerWidth * scaleX, playerHeight * scaleY, hexToRgba(style.player));
       for (const obstacle of snapshot.obstacles) {
-        drawRect((obstacle.x - obstacle.width / 2) * scaleX, (obstacle.y - obstacle.height / 2) * scaleY, obstacle.width * scaleX, obstacle.height * scaleY, [0.98, 0.25, 0.42, 1]);
+        drawRect((obstacle.x - obstacle.width / 2) * scaleX, (obstacle.y - obstacle.height / 2) * scaleY, obstacle.width * scaleX, obstacle.height * scaleY, hexToRgba(style.obstacle));
       }
     },
     destroy() { gl.deleteBuffer(buffer); gl.deleteProgram(program); }
@@ -326,18 +475,25 @@ function createCanvasRenderer(canvas, ctx) {
       canvas.height = Math.round(size.height * dpr);
       ctx.setTransform(canvas.width / size.width, 0, 0, canvas.height / size.height, 0, 0);
     },
-    render(snapshot) {
-      ctx.fillStyle = '#080b22';
+    render(snapshot, progression) {
+      const style = getVisualStyle(progression);
+      ctx.fillStyle = style.background;
       ctx.fillRect(0, 0, size.width, size.height);
-      ctx.fillStyle = '#24306b';
+      ctx.fillStyle = style.accent;
       ctx.fillRect(0, size.height * 0.49, size.width, size.height * 0.02);
-      ctx.fillStyle = '#20c7f5';
+      ctx.fillStyle = style.lane;
       ctx.fillRect(0, size.height * 0.35, size.width, size.height * 0.008);
       ctx.fillRect(0, size.height * 0.63, size.width, size.height * 0.008);
       const player = snapshot.player;
-      ctx.fillStyle = '#fbe047';
-      ctx.fillRect((player.x - player.width / 2) * size.width, (player.y - player.height / 2) * size.height, player.width * size.width, player.height * size.height);
-      ctx.fillStyle = '#fa416b';
+      const playerWidth = player.width * style.formScale;
+      const playerHeight = player.height * style.formScale;
+      if (progression?.equipped?.equipment === 'equipment-visor') {
+        ctx.fillStyle = style.lane;
+        ctx.fillRect((player.x - playerWidth * 0.7) * size.width, (player.y - playerHeight * 0.68) * size.height, playerWidth * 0.18 * size.width, playerHeight * 1.36 * size.height);
+      }
+      ctx.fillStyle = style.player;
+      ctx.fillRect((player.x - playerWidth / 2) * size.width, (player.y - playerHeight / 2) * size.height, playerWidth * size.width, playerHeight * size.height);
+      ctx.fillStyle = style.obstacle;
       for (const obstacle of snapshot.obstacles) ctx.fillRect((obstacle.x - obstacle.width / 2) * size.width, (obstacle.y - obstacle.height / 2) * size.height, obstacle.width * size.width, obstacle.height * size.height);
     },
     destroy() {}
@@ -408,6 +564,37 @@ function setVisible(element, visible) {
   element.hidden = !visible;
 }
 
+const REWARD_NAMES = Object.freeze({
+  en: {
+    'form-default': 'Starter Form',
+    'skin-cyan': 'Cyan Skin',
+    'theme-city': 'Neon City',
+    'form-evolved': 'Pulse Form',
+    'skin-magenta': 'Magenta Skin',
+    'skin-amber': 'Amber Skin',
+    'equipment-visor': 'Neon Visor',
+    'theme-crystal': 'Crystal Tunnel',
+    'form-advanced': 'Plasma Form',
+    'theme-cosmic': 'Cosmic Lab'
+  },
+  'pt-BR': {
+    'form-default': 'Forma Inicial',
+    'skin-cyan': 'Skin Ciano',
+    'theme-city': 'Cidade Neon',
+    'form-evolved': 'Forma Pulse',
+    'skin-magenta': 'Skin Magenta',
+    'skin-amber': 'Skin Âmbar',
+    'equipment-visor': 'Visor Neon',
+    'theme-crystal': 'Túnel Cristal',
+    'form-advanced': 'Forma Plasma',
+    'theme-cosmic': 'Laboratório Cósmico'
+  }
+});
+
+function replaceTokens(template, values) {
+  return Object.entries(values).reduce((result, [key, value]) => result.replace(`{${key}}`, String(value)), template);
+}
+
 export async function bootstrap({
   sdk = createPokiMock(),
   loadStrings = async () => LOCAL_STRINGS,
@@ -431,14 +618,18 @@ export async function bootstrap({
   const strings = readEmbeddedStrings(documentRef);
   const locale = selectLocale(windowRef?.navigator?.language || 'en');
   const text = strings[locale] || strings.en || LOCAL_STRINGS.en;
+  const copy = key => text[key] || strings.en?.[key] || LOCAL_STRINGS.en[key] || key;
   const notifyStorage = key => {
     const notice = documentRef.querySelector('#storage-notice');
     if (notice && key === 'sessionNotPersisted') {
-      notice.textContent = text.storageNotice || LOCAL_STRINGS.en.storageNotice;
+      notice.textContent = copy('storageNotice');
       setVisible(notice, true);
     }
   };
   const storage = createStorageAdapter(getStorage(windowRef), notifyStorage);
+  const progressionStore = createProgressionStore(getStorage(windowRef), notifyStorage);
+  let latestProgression = progressionStore.readProgression();
+  let latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
   const world = createGameWorld();
   const machine = createGameStateMachine(controller);
   const bestScore = storage.readBestScore();
@@ -454,20 +645,25 @@ export async function bootstrap({
     start: documentRef.querySelector('#start-label'),
     playingHint: documentRef.querySelector('#playing-hint'),
     pauseButton: documentRef.querySelector('#pause-button'),
-    restartButton: documentRef.querySelector('#restart-button')
+    restartButton: documentRef.querySelector('#restart-button'),
+    readyProgression: documentRef.querySelector('#ready-progression'),
+    gameOverReward: documentRef.querySelector('#game-over-reward'),
+    gameOverNext: documentRef.querySelector('#game-over-next'),
+    loadoutList: documentRef.querySelector('#loadout-list'),
+    customizeButton: documentRef.querySelector('#customize-button')
   };
 
   documentRef.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.dataset.i18n;
-    if (text[key]) element.textContent = text[key];
+    element.textContent = copy(key);
   });
-  if (elements.title) elements.title.textContent = text.title || LOCAL_STRINGS.en.title;
-  if (elements.start) elements.start.textContent = text.start || LOCAL_STRINGS.en.start;
+  if (elements.title) elements.title.textContent = copy('title');
+  if (elements.start) elements.start.textContent = copy('start');
   if (elements.pauseButton) {
     elements.pauseButton.textContent = 'Ⅱ';
-    elements.pauseButton.setAttribute('aria-label', text.pause || LOCAL_STRINGS.en.pause);
+    elements.pauseButton.setAttribute('aria-label', copy('pause'));
   }
-  if (elements.restartButton) elements.restartButton.textContent = text.restart || LOCAL_STRINGS.en.restart;
+  if (elements.restartButton) elements.restartButton.textContent = copy('restart');
   if (elements.best) elements.best.textContent = String(bestScore);
 
   await machine.finishLoading();
@@ -477,6 +673,52 @@ export async function bootstrap({
   setVisible(elements.gameOver, false);
   await onReady();
 
+  const rewardName = rewardId => REWARD_NAMES[locale]?.[rewardId] || REWARD_NAMES.en[rewardId] || rewardId;
+  const rewardTypeName = type => copy(type);
+  const nextMilestoneText = milestone => milestone
+    ? replaceTokens(copy('nextMilestone'), { label: rewardName(milestone.id), seconds: milestone.threshold })
+    : copy('defaultReward');
+  const renderLoadout = () => {
+    if (!elements.loadoutList) return;
+    elements.loadoutList.replaceChildren();
+    for (const rewardId of latestProgression.unlocked) {
+      const milestone = NEON_MILESTONES.find(item => item.id === rewardId);
+      const type = milestone?.type || rewardId.split('-')[0];
+      const equipped = latestProgression.equipped[type] === rewardId;
+      const row = documentRef.createElement('div');
+      row.className = 'loadout-item';
+      row.dataset.equipped = String(equipped);
+      const label = documentRef.createElement('span');
+      label.textContent = `${rewardTypeName(type)}: ${rewardName(rewardId)}`;
+      row.append(label);
+      if (equipped) {
+        const marker = documentRef.createElement('span');
+        marker.textContent = copy('equipped');
+        row.append(marker);
+      } else if (milestone) {
+        const button = documentRef.createElement('button');
+        button.type = 'button';
+        button.dataset.action = 'equip';
+        button.dataset.rewardId = rewardId;
+        button.textContent = copy('equip');
+        row.append(button);
+      }
+      elements.loadoutList.append(row);
+    }
+  };
+  const syncProgressionUi = () => {
+    const next = latestProgressionResult.nextMilestone || getNextMilestone(latestProgression);
+    const nextText = nextMilestoneText(next);
+    if (elements.readyProgression) elements.readyProgression.textContent = nextText;
+    if (elements.gameOverReward) {
+      const rewards = latestProgressionResult.newlyUnlocked || [];
+      elements.gameOverReward.textContent = rewards.length
+        ? replaceTokens(copy('unlocked'), { label: rewards.map(reward => rewardName(reward.id)).join(', ') })
+        : next ? copy('noNewReward') : copy('defaultReward');
+    }
+    if (elements.gameOverNext) elements.gameOverNext.textContent = nextText;
+    renderLoadout();
+  };
   const syncUi = () => {
     const state = machine.getState();
     setVisible(elements.ready, state === GAME_STATES.READY);
@@ -485,6 +727,7 @@ export async function bootstrap({
     setVisible(elements.gameOver, state === GAME_STATES.GAME_OVER);
     setVisible(elements.playingHint, state === GAME_STATES.PLAYING);
     if (elements.shell) elements.shell.dataset.state = state;
+    syncProgressionUi();
   };
   const refreshHud = snapshot => {
     if (elements.score) elements.score.textContent = String(snapshot.score);
@@ -499,14 +742,31 @@ export async function bootstrap({
     const wasReady = machine.getState() === GAME_STATES.READY;
     await machine.inputStart();
     if (wasReady) world.reset();
+    if (machine.getState() === GAME_STATES.PLAYING) runCompleted = false;
     syncUi();
   };
   const restart = async () => {
     await machine.restartAfterGameOver();
     world.reset();
+    latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
     syncUi();
   };
   const handlePointer = event => {
+    if (event.target.closest?.('[data-action="customize"]')) {
+      machine.openMenu().then(syncUi);
+      return;
+    }
+    if (event.target.closest?.('[data-action="equip"]')) {
+      const rewardId = event.target.closest('[data-action="equip"]').dataset.rewardId;
+      latestProgression = progressionStore.equipReward(rewardId);
+      latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
+      syncUi();
+      return;
+    }
+    if (event.target.closest?.('[data-action="switch-lane"]')) {
+      if (machine.getState() === GAME_STATES.PLAYING) switchLane();
+      return;
+    }
     if (event.target.closest?.('[data-action="pause"]')) {
       machine.pause().then(syncUi);
       return;
@@ -554,6 +814,7 @@ export async function bootstrap({
   world.reset();
   syncUi();
 
+  let runCompleted = false;
   let lastTime = 0;
   const frame = timestamp => {
     const dt = lastTime ? (timestamp - lastTime) / 1000 : 0;
@@ -562,19 +823,22 @@ export async function bootstrap({
       world.update(dt);
       const snapshot = world.snapshot();
       refreshHud(snapshot);
-      if (world.isCollision()) {
+      if (!runCompleted && world.isCollision()) {
+        runCompleted = true;
         audio.collision();
         world.stop();
         storage.writeBestScore(Math.max(bestScore, snapshot.score));
         if (elements.best) elements.best.textContent = String(Math.max(bestScore, snapshot.score));
+        latestProgressionResult = progressionStore.completeRun(snapshot.elapsed);
+        latestProgression = latestProgressionResult.progression;
         machine.die().then(syncUi);
       }
     }
-    renderer.render(world.snapshot());
+    renderer.render(world.snapshot(), latestProgression);
     windowRef?.requestAnimationFrame?.(frame);
   };
   windowRef?.requestAnimationFrame?.(frame);
-  return { controller, machine, world, renderer, storage };
+  return { controller, machine, world, renderer, storage, progression: progressionStore };
 }
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {

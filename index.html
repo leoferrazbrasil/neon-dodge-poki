@@ -26,6 +26,8 @@
           <p class="eyebrow" data-i18n="title">NEON DODGE</p>
           <h1 id="start-label" data-i18n="start">Tap to start</h1>
           <p id="hint-label" data-i18n="controlHint">Cada toque alterna a faixa</p>
+          <p id="ready-progression" class="progression-copy" aria-live="polite"></p>
+          <button id="customize-button" class="secondary-button" type="button" data-action="customize" data-i18n="customize">Customize</button>
         </section>
 
         <section id="pause-panel" class="state-panel" hidden>
@@ -37,12 +39,16 @@
         <section id="menu-panel" class="state-panel" hidden>
           <p class="eyebrow" data-i18n="menu">MENU</p>
           <h2 data-i18n="readyWhen">Ready when you are.</h2>
+          <h3 id="collection-title" data-i18n="collection">Neon collection</h3>
+          <div id="loadout-list" class="loadout-list" aria-live="polite"></div>
           <button class="primary-button" type="button" data-action="resume" data-i18n="resume">Resume</button>
         </section>
 
         <section id="game-over-panel" class="state-panel" hidden>
           <p class="eyebrow" data-i18n="runComplete">RUN COMPLETE</p>
           <h2 data-i18n="oneMore">One more?</h2>
+          <p id="game-over-reward" class="reward-copy" aria-live="polite"></p>
+          <p id="game-over-next" class="progression-copy" aria-live="polite"></p>
           <button id="restart-button" class="primary-button" type="button" data-action="restart">Restart</button>
         </section>
 
@@ -55,8 +61,8 @@
   </main>
   <script id="strings-data" type="application/json">
     {
-      "en": { "title": "Neon Dodge", "start": "Tap to start", "controlHint": "Each tap switches lanes", "paused": "PAUSED", "takeABreath": "Take a breath.", "menu": "MENU", "readyWhen": "Ready when you are.", "runComplete": "RUN COMPLETE", "oneMore": "One more?", "pause": "Pause", "resume": "Resume", "restart": "Restart", "score": "Score", "best": "Best", "storageNotice": "This session score will not be saved." },
-      "pt-BR": { "title": "Neon Dodge", "start": "Toque para começar", "controlHint": "Cada toque alterna a faixa", "paused": "PAUSADO", "takeABreath": "Respire um pouco.", "menu": "MENU", "readyWhen": "Quando quiser, estamos prontos.", "runComplete": "FIM DA RODADA", "oneMore": "Mais uma?", "pause": "Pausar", "resume": "Continuar", "restart": "Reiniciar", "score": "Pontos", "best": "Recorde", "storageNotice": "A pontuação desta sessão não será salva." },
+      "en": { "title": "Neon Dodge", "start": "Tap to start", "controlHint": "Each tap switches lanes", "paused": "PAUSED", "takeABreath": "Take a breath.", "menu": "MENU", "readyWhen": "Ready when you are.", "runComplete": "RUN COMPLETE", "oneMore": "One more?", "pause": "Pause", "resume": "Resume", "restart": "Restart", "score": "Score", "best": "Best", "storageNotice": "This session score will not be saved.", "customize": "Customize", "collection": "Neon collection", "nextMilestone": "Next: {label} at {seconds}s", "unlocked": "Unlocked: {label}", "noNewReward": "Keep going to unlock the next form.", "equipped": "Equipped", "equip": "Equip", "form": "Form", "skin": "Skin", "equipment": "Equipment", "theme": "Theme", "seconds": "seconds", "defaultReward": "Your current loadout is ready." },
+      "pt-BR": { "title": "Neon Dodge", "start": "Toque para começar", "controlHint": "Cada toque alterna a faixa", "paused": "PAUSADO", "takeABreath": "Respire um pouco.", "menu": "MENU", "readyWhen": "Quando quiser, estamos prontos.", "runComplete": "FIM DA RODADA", "oneMore": "Mais uma?", "pause": "Pausar", "resume": "Continuar", "restart": "Reiniciar", "score": "Pontos", "best": "Recorde", "storageNotice": "A pontuação desta sessão não será salva.", "customize": "Personalizar", "collection": "Coleção neon", "nextMilestone": "Próximo: {label} em {seconds}s", "unlocked": "Desbloqueado: {label}", "noNewReward": "Continue para liberar a próxima forma.", "equipped": "Equipado", "equip": "Usar", "form": "Forma", "skin": "Skin", "equipment": "Equipamento", "theme": "Tema", "seconds": "segundos", "defaultReward": "Seu visual atual está pronto." },
       "es": { "title": "Neon Dodge", "start": "Toca para empezar", "controlHint": "Cada toque cambia de carril", "pause": "Pausa", "resume": "Continuar", "restart": "Reiniciar", "score": "Puntuación", "best": "Mejor", "storageNotice": "La puntuación de esta sesión no se guardará." },
       "fr": { "title": "Neon Dodge", "start": "Touchez pour commencer", "controlHint": "Chaque touche change de voie", "pause": "Pause", "resume": "Reprendre", "restart": "Recommencer", "score": "Score", "best": "Record", "storageNotice": "Le score de cette session ne sera pas sauvegardé." },
       "it": { "title": "Neon Dodge", "start": "Tocca per iniziare", "controlHint": "Ogni tocco cambia corsia", "pause": "Pausa", "resume": "Riprendi", "restart": "Ricomincia", "score": "Punteggio", "best": "Record", "storageNotice": "Il punteggio di questa sessione non verrà salvato." },

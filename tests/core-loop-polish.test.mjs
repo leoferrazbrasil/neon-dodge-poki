@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGameWorld, getDifficultyProfile } from '../game.js';
+import { createGameWorld, getDifficultyProfile, createInitialProgression, getVisualStyle } from '../game.js';
 
 test('perfil de dificuldade respeita fases e limites aprovados', () => {
   assert.deepEqual(getDifficultyProfile(0), { speed: 0.26, spawnInterval: 1.3 });
@@ -33,4 +33,18 @@ test('onboarding explica iniciar e alternar faixa', () => {
 test('mock Poki fica exposto no escopo global do navegador', () => {
   const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
   assert.match(source, /globalThis\.PokiSDK/);
+});
+
+test('onboarding mostra o próximo marco e a tela de recompensa', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /id="ready-progression"/);
+  assert.match(html, /id="game-over-reward"/);
+  assert.match(html, /id="game-over-next"/);
+  assert.match(html, /data-action="customize"/);
+});
+
+test('loadout inicial usa a identidade Cidade Neon', () => {
+  const style = getVisualStyle(createInitialProgression());
+  assert.equal(style.background, '#080b22');
+  assert.equal(style.player, '#fbe047');
 });
