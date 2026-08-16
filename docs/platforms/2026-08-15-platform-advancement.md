@@ -1,6 +1,6 @@
 # Neon Dodge — Plano de avanço por plataforma
 
-Data de revalidação: 2026-08-15
+Data de revalidação: 2026-08-16
 
 Este documento separa o `base-offline` do Neon Dodge dos fluxos de publicação de Poki e CrazyGames. Não contém credenciais, tokens ou dados pessoais.
 
@@ -41,12 +41,12 @@ O Basic Launch é o próximo gate externo recomendado. Segundo a documentação 
 - [ ] Capa landscape 1920x1080.
 - [ ] Capa portrait 800x1200.
 - [ ] Capa square 800x800.
-- [ ] Vídeo preview landscape, 15–20 segundos, sem áudio.
-- [ ] Vídeo preview portrait, 15–20 segundos, sem áudio.
+- [x] Vídeo preview landscape, 18 segundos, sem áudio, 7,6 MB.
+- [x] Vídeo preview portrait, 18 segundos, sem áudio, 5,6 MB.
 - [ ] Descrição em inglês.
 - [ ] Instruções de controle em inglês.
 - [ ] Pacote final sem branding ou dependência de outro portal.
-- [ ] Teste no Preview Tool com os tamanhos de iframe documentados.
+- [ ] Teste no Preview Tool com os tamanhos de iframe documentados; aguardando o upload no portal.
 
 ### Critérios técnicos relevantes
 
@@ -119,11 +119,10 @@ Não marcar o Neon Dodge como validado comercialmente enquanto os dois últimos 
 
 ## Próximo avanço executável
 
-1. Produzir as capas e vídeos específicos do CrazyGames.
-2. Revisar o pacote em inglês e o posicionamento PEGI-12/13+.
-3. Abrir o Preview do CrazyGames e executar o QA de submissão.
-4. Preparar a aplicação Poki com as informações acima.
-5. Após a entrada em Basic Launch ou Poki Playtest, analisar os dados reais antes de alterar o core loop.
+1. Revisar o pacote em inglês e o posicionamento PEGI-12/13+.
+2. Abrir o Preview do CrazyGames e executar o QA de submissão.
+3. Preparar a aplicação Poki com as informações acima.
+4. Após a entrada em Basic Launch ou Poki Playtest, analisar os dados reais antes de alterar o core loop.
 
 ## Fontes oficiais revalidadas
 

@@ -1,8 +1,8 @@
 # Artefatos locais de inspeção e referências de workspace
 tmp/
-CrazyGames/
-Poki/
-cofre-games/
+/CrazyGames/
+/Poki/
+/cofre-games/
 
 # Dependências e saídas locais
 node_modules/
