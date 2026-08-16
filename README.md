@@ -49,6 +49,14 @@ Consulte o [plano de avanço por plataforma](docs/platforms/2026-08-15-platform-
 - O intervalo de obstáculos desce de 1,30s para 0,72s, com sequência inicial alternada e sempre uma faixa livre.
 - A primeira tentativa esperada fica em aproximadamente 30–60s; jogadores que aprendem o padrão devem alcançar 60–90s.
 
+## Publicação
+
+- Perfil de plataforma neutro por padrão; nenhum global de portal é atribuído sem `data-platform` declarado.
+- Capas em `store/covers/`, geradas por `node tools/build-covers.mjs` e rasterizadas por `tools/rasterize-covers.html`.
+- Pacote CrazyGames Basic Launch em `store/crazygames/SUBMISSION.md`.
+- Metadados Poki em `store/METADADOS.md`.
+- Vídeos preview capturados por `tools/record-preview.html`.
+
 ## Coleção Neon
 
 - Itens agrupados por tipo, com pré-visualização gerada pelas tabelas de arte do jogo.
