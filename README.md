@@ -4,7 +4,7 @@ MVP hipercasual WebGL para prova de conceito técnica na Poki.
 
 ## Estado
 
-O repositório contém o MVP implementado, sua especificação, o plano e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 79.776 bytes nos quatro arquivos principais.
+O repositório contém o MVP implementado, sua especificação, o plano e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 86.143 bytes nos quatro arquivos principais.
 
 ## Documentação
 
@@ -37,6 +37,14 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 - A dificuldade progride por tempo: 0–15s (0,26→0,30), 15–45s (0,30→0,39), 45–90s (0,39→0,48) e 90s+ em teto de 0,52.
 - O intervalo de obstáculos desce de 1,30s para 0,72s, com sequência inicial alternada e sempre uma faixa livre.
 - A primeira tentativa esperada fica em aproximadamente 30–60s; jogadores que aprendem o padrão devem alcançar 60–90s.
+
+## Prontidão de submissão
+
+- Sete idiomas completos com as mesmas vinte e oito chaves: en, pt-BR, es, fr, it, de e tr.
+- Áudio de recompensa em acorde e aviso sonoro na aproximação do marco.
+- Thumbnail 628x628 em `store/thumbnail-628.svg`, gerada por `node tools/build-thumbnail.mjs` a partir das tabelas de arte do jogo.
+- Metadados de submissão em `store/METADADOS.md`.
+- Carga medida: DOM interativo em 57 ms, carga completa em 406 ms, primeira ação até gameplay em 84 ms.
 
 ## Objetivo visível durante a corrida
 

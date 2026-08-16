@@ -5,13 +5,13 @@ const LOGICAL_SIZES = Object.freeze([
 ]);
 
 const LOCAL_STRINGS = Object.freeze({
-  en: { title: 'Neon Dodge', start: 'Tap to start', controlHint: 'Each tap switches lanes', paused: 'PAUSED', takeABreath: 'Take a breath.', menu: 'MENU', readyWhen: 'Ready when you are.', runComplete: 'RUN COMPLETE', oneMore: 'One more?', pause: 'Pause', resume: 'Resume', restart: 'Restart', score: 'Score', best: 'Best', storageNotice: 'This session score will not be saved.', customize: 'Customize', collection: 'Neon collection', nextMilestone: 'Next: {label} at {seconds}s', unlocked: 'Unlocked: {label}', noNewReward: 'Keep going to unlock the next form.', equipped: 'Equipped', equip: 'Equip', form: 'Form', skin: 'Skin', equipment: 'Equipment', theme: 'Theme', defaultReward: 'Your current loadout is ready.' },
-  'pt-BR': { title: 'Neon Dodge', start: 'Toque para começar', controlHint: 'Cada toque alterna a faixa', paused: 'PAUSADO', takeABreath: 'Respire um pouco.', menu: 'MENU', readyWhen: 'Quando quiser, estamos prontos.', runComplete: 'FIM DA RODADA', oneMore: 'Mais uma?', pause: 'Pausar', resume: 'Continuar', restart: 'Reiniciar', score: 'Pontos', best: 'Recorde', storageNotice: 'A pontuação desta sessão não será salva.', customize: 'Personalizar', collection: 'Coleção neon', nextMilestone: 'Próximo: {label} em {seconds}s', unlocked: 'Desbloqueado: {label}', noNewReward: 'Continue para liberar a próxima forma.', equipped: 'Equipado', equip: 'Usar', form: 'Forma', skin: 'Skin', equipment: 'Equipamento', theme: 'Tema', defaultReward: 'Seu visual atual está pronto.' },
-  es: { title: 'Neon Dodge', start: 'Toca para empezar', controlHint: 'Cada toque cambia de carril', pause: 'Pausa', resume: 'Continuar', restart: 'Reiniciar', score: 'Puntuación', best: 'Mejor', storageNotice: 'La puntuación de esta sesión no se guardará.' },
-  fr: { title: 'Neon Dodge', start: 'Touchez pour commencer', controlHint: 'Chaque touche change de voie', pause: 'Pause', resume: 'Reprendre', restart: 'Recommencer', score: 'Score', best: 'Record', storageNotice: 'Le score de cette session ne sera pas sauvegardé.' },
-  it: { title: 'Neon Dodge', start: 'Tocca per iniziare', controlHint: 'Ogni tocco cambia corsia', pause: 'Pausa', resume: 'Riprendi', restart: 'Ricomincia', score: 'Punteggio', best: 'Record', storageNotice: 'Il punteggio di questa sessione non verrà salvato.' },
-  de: { title: 'Neon Dodge', start: 'Tippen zum Starten', controlHint: 'Jeder Tipp wechselt die Spur', pause: 'Pause', resume: 'Fortsetzen', restart: 'Neustart', score: 'Punkte', best: 'Bestwert', storageNotice: 'Der Punktestand dieser Sitzung wird nicht gespeichert.' },
-  tr: { title: 'Neon Dodge', start: 'Başlamak için dokun', controlHint: 'Her dokunuş şeridi değiştirir', pause: 'Duraklat', resume: 'Devam et', restart: 'Yeniden başlat', score: 'Skor', best: 'En iyi', storageNotice: 'Bu oturumun skoru kaydedilmeyecek.' }
+  en: { title: 'Neon Dodge', start: 'Tap to start', controlHint: 'Each tap switches lanes', paused: 'PAUSED', takeABreath: 'Take a breath.', menu: 'MENU', readyWhen: 'Ready when you are.', runComplete: 'RUN COMPLETE', oneMore: 'One more?', pause: 'Pause', resume: 'Resume', restart: 'Restart', score: 'Score', best: 'Best', storageNotice: 'This session score will not be saved.', customize: 'Customize', collection: 'Neon collection', nextMilestone: 'Next: {label} at {seconds}s', unlocked: 'Unlocked: {label}', noNewReward: 'Keep going to unlock the next form.', equipped: 'Equipped', equip: 'Equip', form: 'Form', skin: 'Skin', equipment: 'Equipment', theme: 'Theme', seconds: 'seconds', defaultReward: 'Your current loadout is ready.' },
+  'pt-BR': { title: 'Neon Dodge', start: 'Toque para começar', controlHint: 'Cada toque alterna a faixa', paused: 'PAUSADO', takeABreath: 'Respire um pouco.', menu: 'MENU', readyWhen: 'Quando quiser, estamos prontos.', runComplete: 'FIM DA RODADA', oneMore: 'Mais uma?', pause: 'Pausar', resume: 'Continuar', restart: 'Reiniciar', score: 'Pontos', best: 'Recorde', storageNotice: 'A pontuação desta sessão não será salva.', customize: 'Personalizar', collection: 'Coleção neon', nextMilestone: 'Próximo: {label} em {seconds}s', unlocked: 'Desbloqueado: {label}', noNewReward: 'Continue para liberar a próxima forma.', equipped: 'Equipado', equip: 'Usar', form: 'Forma', skin: 'Skin', equipment: 'Equipamento', theme: 'Tema', seconds: 'segundos', defaultReward: 'Seu visual atual está pronto.' },
+  es: { title: 'Neon Dodge', start: 'Toca para empezar', controlHint: 'Cada toque cambia de carril', paused: 'PAUSA', takeABreath: 'Respira un momento.', menu: 'MENÚ', readyWhen: 'Cuando quieras, estamos listos.', runComplete: 'FIN DE LA PARTIDA', oneMore: '¿Otra vez?', pause: 'Pausa', resume: 'Continuar', restart: 'Reiniciar', score: 'Puntuación', best: 'Mejor', storageNotice: 'La puntuación de esta sesión no se guardará.', customize: 'Personalizar', collection: 'Colección neón', nextMilestone: 'Siguiente: {label} a los {seconds}s', unlocked: 'Desbloqueado: {label}', noNewReward: 'Sigue jugando para liberar la próxima forma.', equipped: 'Equipado', equip: 'Usar', form: 'Forma', skin: 'Aspecto', equipment: 'Equipo', theme: 'Tema', seconds: 'segundos', defaultReward: 'Tu equipo actual está listo.' },
+  fr: { title: 'Neon Dodge', start: 'Touchez pour commencer', controlHint: 'Chaque touche change de voie', paused: 'PAUSE', takeABreath: 'Respirez un instant.', menu: 'MENU', readyWhen: 'Quand vous voulez, on est prêts.', runComplete: 'PARTIE TERMINÉE', oneMore: 'Encore une ?', pause: 'Pause', resume: 'Reprendre', restart: 'Recommencer', score: 'Score', best: 'Record', storageNotice: 'Le score de cette session ne sera pas sauvegardé.', customize: 'Personnaliser', collection: 'Collection néon', nextMilestone: 'Suivant : {label} à {seconds}s', unlocked: 'Débloqué : {label}', noNewReward: 'Continuez pour débloquer la forme suivante.', equipped: 'Équipé', equip: 'Utiliser', form: 'Forme', skin: 'Apparence', equipment: 'Équipement', theme: 'Thème', seconds: 'secondes', defaultReward: 'Votre équipement actuel est prêt.' },
+  it: { title: 'Neon Dodge', start: 'Tocca per iniziare', controlHint: 'Ogni tocco cambia corsia', paused: 'PAUSA', takeABreath: 'Prendi fiato.', menu: 'MENU', readyWhen: 'Quando vuoi, siamo pronti.', runComplete: 'PARTITA FINITA', oneMore: 'Un\'altra?', pause: 'Pausa', resume: 'Riprendi', restart: 'Ricomincia', score: 'Punteggio', best: 'Record', storageNotice: 'Il punteggio di questa sessione non verrà salvato.', customize: 'Personalizza', collection: 'Collezione neon', nextMilestone: 'Prossimo: {label} a {seconds}s', unlocked: 'Sbloccato: {label}', noNewReward: 'Continua per sbloccare la prossima forma.', equipped: 'Equipaggiato', equip: 'Usa', form: 'Forma', skin: 'Aspetto', equipment: 'Equipaggiamento', theme: 'Tema', seconds: 'secondi', defaultReward: 'Il tuo equipaggiamento è pronto.' },
+  de: { title: 'Neon Dodge', start: 'Tippen zum Starten', controlHint: 'Jeder Tipp wechselt die Spur', paused: 'PAUSE', takeABreath: 'Atme kurz durch.', menu: 'MENÜ', readyWhen: 'Wir sind bereit, wenn du es bist.', runComplete: 'RUNDE BEENDET', oneMore: 'Noch mal?', pause: 'Pause', resume: 'Fortsetzen', restart: 'Neustart', score: 'Punkte', best: 'Bestwert', storageNotice: 'Der Punktestand dieser Sitzung wird nicht gespeichert.', customize: 'Anpassen', collection: 'Neon-Sammlung', nextMilestone: 'Nächstes: {label} bei {seconds}s', unlocked: 'Freigeschaltet: {label}', noNewReward: 'Spiel weiter, um die nächste Form freizuschalten.', equipped: 'Ausgerüstet', equip: 'Nutzen', form: 'Form', skin: 'Skin', equipment: 'Ausrüstung', theme: 'Thema', seconds: 'Sekunden', defaultReward: 'Deine Ausrüstung ist bereit.' },
+  tr: { title: 'Neon Dodge', start: 'Başlamak için dokun', controlHint: 'Her dokunuş şeridi değiştirir', paused: 'DURAKLADI', takeABreath: 'Biraz nefes al.', menu: 'MENÜ', readyWhen: 'Hazır olduğunda başlıyoruz.', runComplete: 'TUR BİTTİ', oneMore: 'Bir tur daha?', pause: 'Duraklat', resume: 'Devam et', restart: 'Yeniden başlat', score: 'Skor', best: 'En iyi', storageNotice: 'Bu oturumun skoru kaydedilmeyecek.', customize: 'Özelleştir', collection: 'Neon koleksiyonu', nextMilestone: 'Sıradaki: {label} {seconds}sn\'de', unlocked: 'Açıldı: {label}', noNewReward: 'Sonraki formu açmak için devam et.', equipped: 'Kuşanıldı', equip: 'Kullan', form: 'Form', skin: 'Görünüm', equipment: 'Ekipman', theme: 'Tema', seconds: 'saniye', defaultReward: 'Mevcut donanımın hazır.' }
 });
 
 export const GAME_STATES = Object.freeze({
@@ -857,20 +857,23 @@ export function createRenderer(canvas) {
   return ctx ? createCanvasRenderer(canvas, ctx) : { resize() {}, render() {}, destroy() {} };
 }
 
+const REWARD_CHORD = Object.freeze([523.25, 659.25, 783.99, 1046.5]);
+
 export function createAudio() {
   let context = null;
   let muted = false;
-  const tone = (frequency, duration) => {
+  const tone = (frequency, duration, delay = 0) => {
     if (muted || !context) return;
     try {
+      const startAt = context.currentTime + delay;
       const oscillator = context.createOscillator();
       const gain = context.createGain();
       oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0.035, context.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+      gain.gain.setValueAtTime(0.035, startAt);
+      gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
       oscillator.connect(gain).connect(context.destination);
-      oscillator.start();
-      oscillator.stop(context.currentTime + duration);
+      oscillator.start(startAt);
+      oscillator.stop(startAt + duration);
     } catch { /* audio is optional */ }
   };
   return {
@@ -883,6 +886,10 @@ export function createAudio() {
     },
     laneChange() { tone(520, 0.08); },
     collision() { tone(120, 0.18); },
+    milestoneNear() { tone(660, 0.06); },
+    reward() {
+      REWARD_CHORD.forEach((frequency, index) => tone(frequency, 0.18, index * 0.075));
+    },
     setMuted(value) { muted = Boolean(value); }
   };
 }
@@ -1106,6 +1113,12 @@ export async function bootstrap({
           ? copy('runComplete')
           : replaceTokens(copy('nextMilestone'), { label: objective.kind === 'best' ? copy('best') : rewardName(objective.id), seconds: Math.ceil(objective.target) }));
     }
+    const beat = Math.floor(objective.remaining);
+    if (objective.imminent && objective.kind !== 'record' && beat !== lastBeat && beat >= 0 && beat <= 2) {
+      lastBeat = beat;
+      audio.milestoneNear();
+    }
+    if (!objective.imminent) lastBeat = -1;
     if (elements.playingHint && !elements.playingHint.hidden && (laneSwitches >= 2 || snapshot.elapsed >= 6)) {
       setVisible(elements.playingHint, false);
     }
@@ -1126,6 +1139,7 @@ export async function bootstrap({
       laneSwitches = 0;
       rewardHoldUntil = 0;
       lastEarned = null;
+      lastBeat = -1;
     }
     syncUi();
   };
@@ -1135,6 +1149,7 @@ export async function bootstrap({
     laneSwitches = 0;
     rewardHoldUntil = 0;
     lastEarned = null;
+    lastBeat = -1;
     latestProgressionResult = { newlyUnlocked: [], nextMilestone: getNextMilestone(latestProgression) };
     syncUi();
   };
@@ -1223,6 +1238,7 @@ export async function bootstrap({
   let laneSwitches = 0;
   let rewardHoldUntil = 0;
   let lastEarned = null;
+  let lastBeat = -1;
   let lastTime = 0;
   const frame = timestamp => {
     const dt = lastTime ? (timestamp - lastTime) / 1000 : 0;
@@ -1236,7 +1252,7 @@ export async function bootstrap({
         latestProgression = earned.progression;
         rewardHoldUntil = snapshot.elapsed + REWARD_HOLD;
         lastEarned = earned.newlyUnlocked[earned.newlyUnlocked.length - 1];
-        audio.unlock();
+        audio.reward();
         syncProgressionUi();
       }
       refreshHud(snapshot);
