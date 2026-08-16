@@ -4,16 +4,18 @@ MVP hipercasual WebGL para prova de conceito técnica na Poki.
 
 ## Estado
 
-O repositório contém o MVP implementado, sua especificação, o plano e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 51.386 bytes nos quatro arquivos principais.
+O repositório contém o MVP implementado, sua especificação, o plano e os testes. O build runtime mantém o isolamento de rede e um descarregamento inicial de 73.250 bytes nos quatro arquivos principais.
 
 ## Documentação
 
 - [Especificação](docs/superpowers/specs/2026-08-15-neon-dodge-design.md)
 - [Especificação de core loop e retenção](docs/superpowers/specs/2026-08-15-neon-dodge-core-loop-polish-design.md)
 - [Especificação de Evolução Neon](docs/superpowers/specs/2026-08-15-neon-dodge-evolucao-neon-design.md)
+- [Especificação de Mundo e Elenco](docs/superpowers/specs/2026-08-15-neon-dodge-mundo-e-elenco-design.md)
 - [Plano de implementação](docs/superpowers/plans/2026-08-15-neon-dodge.md)
 - [Plano de core loop e onboarding](docs/superpowers/plans/2026-08-15-neon-dodge-core-loop-polish.md)
 - [Plano de Evolução Neon](docs/superpowers/plans/2026-08-15-neon-dodge-evolucao-neon.md)
+- [Plano de Mundo e Elenco](docs/superpowers/plans/2026-08-15-neon-dodge-mundo-e-elenco.md)
 - Cofre Obsidian local: `D:\LEONARDO\Games\cofre-games`
 
 ## Restrições principais
@@ -32,6 +34,16 @@ O repositório contém o MVP implementado, sua especificação, o plano e os tes
 - A dificuldade progride por tempo: 0–15s (0,26→0,30), 15–45s (0,30→0,39), 45–90s (0,39→0,48) e 90s+ em teto de 0,52.
 - O intervalo de obstáculos desce de 1,30s para 0,72s, com sequência inicial alternada e sempre uma faixa livre.
 - A primeira tentativa esperada fica em aproximadamente 30–60s; jogadores que aprendem o padrão devem alcançar 60–90s.
+
+## Mundo e elenco
+
+- A estrada tem leito, bordas de contenção, guias de faixa e marcação tracejada em movimento.
+- O cenário rola em três camadas de paralaxe com profundidade 0,12, 0,38 e 1,0.
+- Cada marco de progressão atravessa a pista como um farol e cruza NOVA no instante exato do marco.
+- NOVA é composta por partes convexas: propulsor, aletas, casco, visor, lente, anel e Núcleo Neon.
+- O núcleo pulsa por tempo decorrido e o propulsor alonga na troca de faixa.
+- As três variantes de Glitch (Drone, Estilhaço e Portal) têm silhueta e cor próprias.
+- Toda a arte é função pura de estado, sem aleatoriedade no caminho de render.
 
 ## Evolução Neon
 

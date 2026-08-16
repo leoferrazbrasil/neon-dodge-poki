@@ -92,7 +92,7 @@ Em menos de cinco segundos um jogador do público-alvo identifica NOVA, percebe 
 
 - Pureza: mesma entrada produz saída idêntica em todas as funções de arte.
 - Convexidade: toda parte de toda entidade é convexa.
-- Contagem: cada entidade declara pelo menos oito partes.
+- Contagem: NOVA declara pelo menos oito partes e cada Glitch pelo menos cinco.
 - Paleta: nenhuma cor de parte fora dos tokens do tema ativo.
 - Invariantes de hitbox e dificuldade preservados.
 - `npm test` e `npm run check:build` aprovados.

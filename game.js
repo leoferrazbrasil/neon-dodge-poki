@@ -394,6 +394,7 @@ export function getVisualStyle(progression) {
     theme: themes[theme] ? theme : 'theme-city',
     player: skins[skin] || skins['skin-cyan'],
     obstacle: '#fa416b',
+    glitchTones: GLITCH_TONES,
     form,
     equipment: progression?.equipped?.equipment || null,
     formScale: form === 'form-advanced' ? 1.08 : form === 'form-evolved' ? 1.04 : 1
@@ -496,6 +497,94 @@ export function getActiveBeacons(elapsed) {
   return beacons;
 }
 
+const PLAYER_HULLS = Object.freeze({
+  'form-default': Object.freeze([[-0.42, -0.20], [-0.10, -0.32], [0.26, -0.24], [0.46, 0], [0.26, 0.24], [-0.10, 0.32], [-0.42, 0.20]]),
+  'form-evolved': Object.freeze([[-0.46, 0], [-0.18, -0.34], [0.20, -0.28], [0.46, 0], [0.20, 0.28], [-0.18, 0.34]]),
+  'form-advanced': Object.freeze([[-0.44, -0.10], [-0.16, -0.30], [0.22, -0.26], [0.48, 0], [0.22, 0.26], [-0.16, 0.30], [-0.44, 0.10]])
+});
+
+const PLAYER_FORM_EXTRAS = Object.freeze({
+  'form-default': Object.freeze([]),
+  'form-evolved': Object.freeze([
+    Object.freeze({ id: 'pulse-fin-top', points: Object.freeze([[-0.20, -0.34], [0.02, -0.52], [0.10, -0.44], [-0.10, -0.28]]), tone: 'playerAccent', alpha: 0.85 }),
+    Object.freeze({ id: 'pulse-fin-bottom', points: Object.freeze([[-0.10, 0.28], [0.10, 0.44], [0.02, 0.52], [-0.20, 0.34]]), tone: 'playerAccent', alpha: 0.85 })
+  ]),
+  'form-advanced': Object.freeze([
+    Object.freeze({ id: 'crown-top', points: Object.freeze([[-0.10, -0.30], [0.04, -0.54], [0.18, -0.30]]), tone: 'playerAccent', alpha: 0.9 }),
+    Object.freeze({ id: 'crown-bottom', points: Object.freeze([[-0.10, 0.30], [0.18, 0.30], [0.04, 0.54]]), tone: 'playerAccent', alpha: 0.9 }),
+    Object.freeze({ id: 'plasma-spike', points: Object.freeze([[0.44, -0.11], [0.60, 0], [0.44, 0.11]]), tone: 'lane', alpha: 0.9 })
+  ])
+});
+
+const PLAYER_BODY = Object.freeze([
+  Object.freeze({ id: 'wing-top', points: Object.freeze([[-0.30, -0.24], [-0.04, -0.50], [0.10, -0.42], [-0.08, -0.18]]), tone: 'player', alpha: 0.75 }),
+  Object.freeze({ id: 'wing-bottom', points: Object.freeze([[-0.08, 0.18], [0.10, 0.42], [-0.04, 0.50], [-0.30, 0.24]]), tone: 'player', alpha: 0.75 })
+]);
+
+const PLAYER_FACE = Object.freeze([
+  Object.freeze({ id: 'visor-plate', points: Object.freeze([[0.08, -0.17], [0.30, -0.13], [0.40, 0], [0.30, 0.13], [0.08, 0.17]]), tone: 'playerAccent', alpha: 0.95 }),
+  Object.freeze({ id: 'visor-lens', points: Object.freeze([[0.14, -0.09], [0.28, -0.065], [0.35, 0], [0.28, 0.065], [0.14, 0.09]]), tone: 'background', alpha: 1 }),
+  Object.freeze({ id: 'core-ring', points: Object.freeze([[-0.16, -0.17], [0.02, 0], [-0.16, 0.17], [-0.34, 0]]), tone: 'lane', alpha: 0.9 })
+]);
+
+const THRUSTER_POINTS = Object.freeze([[-0.36, -0.17], [-0.36, 0.17]]);
+const CORE_POINTS = Object.freeze([[-0.16, -0.08], [-0.06, 0], [-0.16, 0.08], [-0.26, 0]]);
+
+const GLITCH_PARTS = Object.freeze({
+  0: Object.freeze([
+    Object.freeze({ id: 'drone-fin', points: Object.freeze([[-0.5, -0.34], [-0.30, -0.20], [-0.30, 0.20], [-0.5, 0.34]]), tone: 'glitch', alpha: 0.6 }),
+    Object.freeze({ id: 'drone-pod-top', points: Object.freeze([[-0.30, -0.46], [0.30, -0.46], [0.24, -0.20], [-0.24, -0.20]]), tone: 'glitch', alpha: 0.8 }),
+    Object.freeze({ id: 'drone-pod-bottom', points: Object.freeze([[-0.24, 0.20], [0.24, 0.20], [0.30, 0.46], [-0.30, 0.46]]), tone: 'glitch', alpha: 0.8 }),
+    Object.freeze({ id: 'drone-body', points: Object.freeze([[-0.5, -0.20], [0.5, -0.20], [0.5, 0.20], [-0.5, 0.20]]), tone: 'glitch', alpha: 1 }),
+    Object.freeze({ id: 'drone-eye-plate', points: Object.freeze([[-0.16, -0.13], [0.34, -0.13], [0.34, 0.13], [-0.16, 0.13]]), tone: 'background', alpha: 0.9 }),
+    Object.freeze({ id: 'drone-eye-lens', points: Object.freeze([[0.02, -0.07], [0.26, -0.07], [0.26, 0.07], [0.02, 0.07]]), tone: 'obstacleAccent', alpha: 1 })
+  ]),
+  1: Object.freeze([
+    Object.freeze({ id: 'shard-spike-left', points: Object.freeze([[-0.34, -0.10], [-0.5, 0.02], [-0.30, 0.14]]), tone: 'glitch', alpha: 0.75 }),
+    Object.freeze({ id: 'shard-spike-right', points: Object.freeze([[0.30, 0.14], [0.5, 0.02], [0.34, -0.10]]), tone: 'glitch', alpha: 0.75 }),
+    Object.freeze({ id: 'shard-core', points: Object.freeze([[0, -0.5], [0.34, -0.16], [0.30, 0.30], [0, 0.5], [-0.30, 0.30], [-0.34, -0.16]]), tone: 'glitch', alpha: 1 }),
+    Object.freeze({ id: 'shard-facet', points: Object.freeze([[0, -0.30], [0.18, -0.05], [0, 0.28], [-0.18, -0.05]]), tone: 'background', alpha: 0.75 }),
+    Object.freeze({ id: 'shard-glint', points: Object.freeze([[0, -0.34], [0.08, -0.14], [0, -0.02], [-0.08, -0.14]]), tone: 'obstacleAccent', alpha: 1 })
+  ]),
+  2: Object.freeze([
+    Object.freeze({ id: 'portal-spine', points: Object.freeze([[-0.5, -0.5], [-0.18, -0.5], [-0.18, 0.5], [-0.5, 0.5]]), tone: 'glitch', alpha: 1 }),
+    Object.freeze({ id: 'portal-arm-top', points: Object.freeze([[-0.18, -0.5], [0.5, -0.5], [0.5, -0.24], [-0.18, -0.24]]), tone: 'glitch', alpha: 1 }),
+    Object.freeze({ id: 'portal-arm-bottom', points: Object.freeze([[-0.18, 0.24], [0.5, 0.24], [0.5, 0.5], [-0.18, 0.5]]), tone: 'glitch', alpha: 1 }),
+    Object.freeze({ id: 'portal-pillar', points: Object.freeze([[-0.42, -0.34], [-0.26, -0.34], [-0.26, 0.34], [-0.42, 0.34]]), tone: 'background', alpha: 0.55 }),
+    Object.freeze({ id: 'portal-mouth-top', points: Object.freeze([[-0.10, -0.42], [0.42, -0.42], [0.42, -0.30], [-0.10, -0.30]]), tone: 'obstacleAccent', alpha: 1 }),
+    Object.freeze({ id: 'portal-mouth-bottom', points: Object.freeze([[-0.10, 0.30], [0.42, 0.30], [0.42, 0.42], [-0.10, 0.42]]), tone: 'obstacleAccent', alpha: 1 })
+  ])
+});
+
+const GLITCH_TONES = Object.freeze(['#fa416b', '#ff7a1f', '#ff4fa3']);
+
+export function getGlitchTone(kind = 0) {
+  return GLITCH_TONES[Math.abs(Number(kind) || 0) % 3];
+}
+
+export function getGlitchParts(kind = 0) {
+  return GLITCH_PARTS[Math.abs(Number(kind) || 0) % 3] || GLITCH_PARTS[0];
+}
+
+export function getPlayerHull(form = 'form-default') {
+  return PLAYER_HULLS[form] || PLAYER_HULLS['form-default'];
+}
+
+export function getPlayerParts(form = 'form-default', { elapsed = 0, laneOffset = 0 } = {}) {
+  const time = Math.max(0, Number(elapsed) || 0);
+  const stretch = 1 + Math.min(1, Math.abs(Number(laneOffset) || 0) / 0.14) * 1.4;
+  const pulse = 0.62 + 0.38 * Math.abs(Math.sin(time * 3.4));
+  const thruster = {
+    id: 'thruster',
+    points: [[-0.36 - 0.16 * stretch, THRUSTER_POINTS[0][1] * 0.7], THRUSTER_POINTS[0], THRUSTER_POINTS[1], [-0.36 - 0.16 * stretch, THRUSTER_POINTS[1][1] * 0.7]],
+    tone: 'playerAccent',
+    alpha: 0.5
+  };
+  const hull = { id: 'hull', points: getPlayerHull(form), tone: 'player', alpha: 1 };
+  const core = { id: 'core', points: CORE_POINTS, tone: 'playerAccent', alpha: pulse };
+  return [thruster, ...PLAYER_BODY, hull, ...PLAYER_FACE, core, ...(PLAYER_FORM_EXTRAS[form] || PLAYER_FORM_EXTRAS['form-default'])];
+}
+
 export function getPlayerShape(form = 'form-default') {
   return PLAYER_SHAPES[form] || PLAYER_SHAPES['form-default'];
 }
@@ -587,28 +676,28 @@ function drawWorldArt(style, size, snapshot, drawRect, drawPolygon) {
   drawBeaconArt(style, size, snapshot, drawRect);
 }
 
-function drawPlayerArt(style, player, size, drawRect, drawPolygon) {
-  const scaleX = size.width;
-  const scaleY = size.height;
-  const playerWidth = player.width * style.formScale;
-  const playerHeight = player.height * style.formScale;
-  drawPolygon(toPixels(getPlayerShape(style.form), player.x, player.y, playerWidth, playerHeight, scaleX, scaleY), hexToRgba(style.player));
-  drawRect((player.x - playerWidth * 0.25) * scaleX, (player.y - playerHeight * 0.1) * scaleY, playerWidth * 0.5 * scaleX, playerHeight * 0.2 * scaleY, hexToRgba(style.playerAccent, 0.95));
-  drawRect((player.x - playerWidth * 0.08) * scaleX, (player.y - playerHeight * 0.04) * scaleY, playerWidth * 0.16 * scaleX, playerHeight * 0.08 * scaleY, hexToRgba(style.background));
+function drawParts(parts, style, entity, size, scale, drawPolygon, overrides = {}) {
+  const width = entity.width * scale;
+  const height = entity.height * scale;
+  for (const part of parts) {
+    const color = overrides[part.tone] || style[part.tone] || style.accent;
+    drawPolygon(toPixels(part.points, entity.x, entity.y, width, height, size.width, size.height), hexToRgba(color, part.alpha));
+  }
+}
+
+function drawPlayerArt(style, player, size, drawRect, drawPolygon, snapshot) {
+  const laneOffset = player.y - laneY(player.lane);
+  const parts = getPlayerParts(style.form, { elapsed: snapshot?.elapsed || 0, laneOffset });
+  drawParts(parts, style, player, size, style.formScale, drawPolygon);
   if (style.equipment === 'equipment-visor') {
-    drawRect((player.x - playerWidth * 0.7) * scaleX, (player.y - playerHeight * 0.68) * scaleY, playerWidth * 0.18 * scaleX, playerHeight * 1.36 * scaleY, hexToRgba(style.lane, 0.85));
+    const playerWidth = player.width * style.formScale;
+    const playerHeight = player.height * style.formScale;
+    drawRect((player.x - playerWidth * 0.7) * size.width, (player.y - playerHeight * 0.68) * size.height, playerWidth * 0.18 * size.width, playerHeight * 1.36 * size.height, hexToRgba(style.lane, 0.85));
   }
 }
 
 function drawObstacleArt(style, obstacle, size, drawRect, drawPolygon) {
-  const scaleX = size.width;
-  const scaleY = size.height;
-  drawPolygon(toPixels(getObstacleShape(obstacle.kind), obstacle.x, obstacle.y, obstacle.width, obstacle.height, scaleX, scaleY), hexToRgba(style.obstacle));
-  if (obstacle.kind === 1) {
-    drawPolygon(toPixels([[-0.22, 0], [0, -0.22], [0.22, 0], [0, 0.22]], obstacle.x, obstacle.y, obstacle.width, obstacle.height, scaleX, scaleY), hexToRgba(style.obstacleAccent));
-  } else {
-    drawRect((obstacle.x - obstacle.width * 0.2) * scaleX, (obstacle.y - obstacle.height * 0.08) * scaleY, obstacle.width * 0.4 * scaleX, obstacle.height * 0.16 * scaleY, hexToRgba(style.obstacleAccent));
-  }
+  drawParts(getGlitchParts(obstacle.kind), style, obstacle, size, 1, drawPolygon, { glitch: getGlitchTone(obstacle.kind) });
 }
 
 function createWebGLRenderer(canvas, gl) {
@@ -661,7 +750,7 @@ function createWebGLRenderer(canvas, gl) {
       gl.clearColor(...hexToRgba(style.background));
       gl.clear(gl.COLOR_BUFFER_BIT);
       drawWorldArt(style, size, snapshot, drawRect, drawPolygon);
-      drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon);
+      drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon, snapshot);
       for (const obstacle of snapshot.obstacles) {
         drawObstacleArt(style, obstacle, size, drawRect, drawPolygon);
       }
@@ -697,7 +786,7 @@ function createCanvasRenderer(canvas, ctx) {
       ctx.fillStyle = style.background;
       ctx.fillRect(0, 0, size.width, size.height);
       drawWorldArt(style, size, snapshot, drawRect, drawPolygon);
-      drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon);
+      drawPlayerArt(style, snapshot.player, size, drawRect, drawPolygon, snapshot);
       for (const obstacle of snapshot.obstacles) drawObstacleArt(style, obstacle, size, drawRect, drawPolygon);
     },
     destroy() {}
