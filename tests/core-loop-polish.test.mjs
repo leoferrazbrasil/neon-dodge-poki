@@ -28,11 +28,18 @@ test('onboarding explica iniciar e alternar faixa', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /Toque para começar/);
   assert.match(html, /Cada toque alterna a faixa/);
+  assert.match(html, /id="hint-label"[^>]*data-i18n="controlHint"/);
+  assert.match(html, /id="hint-label"[^>]*>Each tap switches lanes<\/p>/);
 });
 
 test('mock Poki fica exposto no escopo global do navegador', () => {
   const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
   assert.match(source, /globalThis\.PokiSDK/);
+});
+
+test('locale ativo atualiza o idioma semântico do documento', () => {
+  const source = fs.readFileSync(new URL('../game.js', import.meta.url), 'utf8');
+  assert.match(source, /documentElement\.lang\s*=\s*locale/);
 });
 
 test('onboarding mostra o próximo marco e a tela de recompensa', () => {

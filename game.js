@@ -618,6 +618,7 @@ export async function bootstrap({
   const strings = readEmbeddedStrings(documentRef);
   const locale = selectLocale(windowRef?.navigator?.language || 'en');
   const text = strings[locale] || strings.en || LOCAL_STRINGS.en;
+  if (documentRef.documentElement) documentRef.documentElement.lang = locale;
   const copy = key => text[key] || strings.en?.[key] || LOCAL_STRINGS.en[key] || key;
   const notifyStorage = key => {
     const notice = documentRef.querySelector('#storage-notice');
